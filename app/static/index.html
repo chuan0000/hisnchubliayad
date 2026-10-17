@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>國際佛光會新竹青年分團 - 成果展示與動態管理系統</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            blia: {
+              gold: '#D97706',
+              lightgold: '#FBBF24',
+              amber: '#F59E0B',
+              dark: '#1E293B',
+              cream: '#FFFBEB',
+              orange: '#EA580C'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    [v-cloak] { display: none; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased font-sans min-h-screen flex flex-col">
+  <div id="app" v-cloak class="flex-grow flex flex-col">
+
+    <!-- 頂部即時公告跑馬燈 -->
+    <div v-if="blocks.announcement_enabled !== 'false'" class="bg-gradient-to-r from-amber-600 to-orange-600 text-white text-sm py-2 px-4 shadow-sm flex items-center justify-between">
+      <div class="max-w-7xl mx-auto w-full flex items-center justify-between">
+        <div class="flex items-center space-x-2 truncate">
+          <span class="bg-white/20 text-xs px-2 py-0.5 rounded font-bold uppercase tracking-wider">即時快訊</span>
+          <span class="truncate">{{ blocks.announcement_text || '📢 2026 年度「VEGRUN 全民蔬食路跑」與「新竹青年生活禪」現正熱烈打卡報名中，歡迎青年朋友踴躍登錄！' }}</span>
+        </div>
+        <a :href="blocks.announcement_link || '#health'" class="text-xs bg-white text-amber-800 font-medium px-3 py-1 rounded-full shadow hover:bg-amber-100 transition whitespace-nowrap ml-4">
+          前往登記 <i class="fas fa-arrow-right ml-1"></i>
+        </a>
+      </div>
+    </div>
+
+    <!-- 導航列 Header -->
+    <header class="bg-white/95 backdrop-blur-md sticky top-0 z-40 border-b border-amber-100 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-md shadow-amber-200">
+            <i class="fas fa-dharmachakra text-2xl"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-slate-900 tracking-wide flex items-center">
+              {{ blocks.site_title || '國際佛光會新竹青年分團' }}
+              <span class="ml-2 text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">成果庫</span>
+            </h1>
+            <p class="text-xs text-slate-500 hidden sm:block">{{ blocks.site_subtitle || '佛教青年的活力新基地・以智慧生活・用慈悲行願' }}</p>
+          </div>
+        </div>
+
+        <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-700">
+          <a href="#aims" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-compass text-amber-500"></i>
+            <span>四大宗旨</span>
+          </a>
+          <a href="#health" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-running text-emerald-500"></i>
+            <span>健走跑步打卡</span>
+          </a>
+          <a href="#team" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-users text-blue-500"></i>
+            <span>幹部團隊</span>
+          </a>
+          <a href="#contact" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-map-marker-alt text-rose-500"></i>
+            <span>道場資訊</span>
+          </a>
+        </nav>
+
+        <div class="flex items-center space-x-3">
+          <a href="/admin" class="text-xs sm:text-sm px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-medium shadow-sm transition flex items-center space-x-1.5">
+            <i class="fas fa-cogs text-amber-400"></i>
+            <span>後台管理 (分團長 / 評鑑秘書)</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- 主視覺 Hero Banner 區塊 -->
+    <section class="relative bg-gradient-to-b from-amber-50 via-orange-50/30 to-slate-50 py-16 sm:py-24 overflow-hidden border-b border-amber-100">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+            <div class="inline-flex items-center space-x-2 px-3 py-1.5 rounded-full bg-amber-100/80 border border-amber-300 text-amber-800 text-xs font-semibold">
+              <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+              <span>{{ blocks.hero_badge || '2026 年度成果評鑑暨動態成果管理系統' }}</span>
+            </div>
+            <h2 class="text-3xl sm:text-5xl font-black text-slate-900 leading-tight">
+              {{ blocks.hero_heading || '凝聚青年力量・實踐三好四給' }}
+            </h2>
+            <p class="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl">
+              {{ blocks.hero_description || '深耕新竹在地，連結大專青年與科技新貴。秉持佛光山星雲大師四大宗旨「以文化弘揚佛法、以教育培養人才、以慈善福利社會、以共修淨化人心」，展現新竹青年的蓬勃朝氣與實踐行動。' }}
+            </p>
+            <div class="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-4">
+              <a href="#aims" class="px-6 py-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-md shadow-amber-300 transition flex items-center space-x-2">
+                <i class="fas fa-search-plus"></i>
+                <span>瀏覽年度佐證庫</span>
+              </a>
+              <button @click="showHealthModal = true" class="px-6 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-800 font-semibold border border-slate-300 shadow-sm transition flex items-center space-x-2">
+                <i class="fas fa-heartbeat text-rose-500"></i>
+                <span>立即健康打卡</span>
+              </button>
+              <a href="/admin" class="px-4 py-3 rounded-xl text-slate-600 hover:text-amber-700 font-medium transition flex items-center space-x-1">
+                <span>CMS 系統入口</span>
+                <i class="fas fa-external-link-alt text-xs"></i>
+              </a>
+            </div>
+          </div>
+          <div class="lg:col-span-5 relative">
+            <div class="relative rounded-2xl overflow-hidden shadow-2xl border-4 border-white bg-slate-200 aspect-video lg:aspect-[4/3] group">
+              <img :src="blocks.hero_banner_image || 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80'" alt="Banner" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent flex flex-col justify-end p-6 text-white">
+                <div class="text-xs uppercase tracking-widest text-amber-300 font-semibold">BLIA Hsinchu Youth</div>
+                <div class="text-lg font-bold">做好事・說好話・存好心</div>
+                <div class="text-xs text-slate-300">給人信心・給人歡喜・給人希望・給人方便</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 看板數值統計 Cards -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card p-5 rounded-2xl shadow-lg border border-amber-100 flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shrink-0">
+            <i class="fas fa-user-friends"></i>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">{{ blocks.stat_youth_members || 86 }}</div>
+            <div class="text-xs font-medium text-slate-500">活躍青年團員數</div>
+          </div>
+        </div>
+
+        <div class="glass-card p-5 rounded-2xl shadow-lg border border-amber-100 flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl shrink-0">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">{{ blocks.stat_total_events || 34 }}</div>
+            <div class="text-xs font-medium text-slate-500">年度舉辦活動場次</div>
+          </div>
+        </div>
+
+        <div class="glass-card p-5 rounded-2xl shadow-lg border border-amber-100 flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+            <i class="fas fa-hands-helping"></i>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">{{ blocks.stat_service_hours || 1280 }}</div>
+            <div class="text-xs font-medium text-slate-500">志工服務時數 (hr)</div>
+          </div>
+        </div>
+
+        <div class="glass-card p-5 rounded-2xl shadow-lg border border-amber-100 flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl shrink-0">
+            <i class="fas fa-route"></i>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900">{{ healthStats.total_km || blocks.stat_vegrun_km || 22.5 }}</div>
+            <div class="text-xs font-medium text-slate-500">蔬食健走里程 (KM)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 四大宗旨成果佐證檔案庫專區 -->
+    <section id="aims" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div class="text-center max-w-3xl mx-auto mb-12">
+        <div class="text-xs font-bold uppercase tracking-widest text-amber-600 mb-2">Four Great Objectives of BLIA</div>
+        <h3 class="text-3xl font-bold text-slate-900">四大宗旨成果佐證檔案庫</h3>
+        <p class="text-slate-600 mt-3 text-sm sm:text-base">
+          {{ blocks.four_aims_intro || '依循星雲大師創會宗旨，將人間佛教落實在生活每處細節，以下為分團本年度各項具體推動成果與公文檔案歸檔。' }}
+        </p>
+      </div>
+
+      <!-- 分類頁籤與搜尋篩選 -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+        <div class="flex flex-wrap items-center justify-center gap-2 bg-slate-200/70 p-1.5 rounded-xl text-sm font-semibold">
+          <button @click="currentCategory = ''" :class="currentCategory === '' ? 'bg-white text-slate-900 shadow' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-lg transition">
+            全部成果 ({{ evidenceList.length }})
+          </button>
+          <button @click="currentCategory = 'culture'" :class="currentCategory === 'culture' ? 'bg-amber-500 text-white shadow' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-lg transition flex items-center space-x-1">
+            <span>🌸 文化弘法</span>
+            <span class="text-xs opacity-80">({{ countCategory('culture') }})</span>
+          </button>
+          <button @click="currentCategory = 'education'" :class="currentCategory === 'education' ? 'bg-blue-600 text-white shadow' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-lg transition flex items-center space-x-1">
+            <span>📚 教育培力</span>
+            <span class="text-xs opacity-80">({{ countCategory('education') }})</span>
+          </button>
+          <button @click="currentCategory = 'cultivation'" :class="currentCategory === 'cultivation' ? 'bg-emerald-600 text-white shadow' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-lg transition flex items-center space-x-1">
+            <span>🙏 共修淨心</span>
+            <span class="text-xs opacity-80">({{ countCategory('cultivation') }})</span>
+          </button>
+          <button @click="currentCategory = 'charity'" :class="currentCategory === 'charity' ? 'bg-rose-600 text-white shadow' : 'text-slate-600 hover:text-slate-900'" class="px-4 py-2 rounded-lg transition flex items-center space-x-1">
+            <span>❤️ 慈善福田</span>
+            <span class="text-xs opacity-80">({{ countCategory('charity') }})</span>
+          </button>
+        </div>
+
+        <div class="relative w-full sm:w-72">
+          <i class="fas fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
+          <input v-model="searchKeyword" type="text" placeholder="搜尋成果標題、地點..." class="w-full pl-9 pr-4 py-2 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 shadow-sm">
+        </div>
+      </div>
+
+      <!-- 佐證成果卡片網格 -->
+      <div v-if="filteredEvidence.length === 0" class="text-center py-16 bg-white rounded-2xl border border-dashed border-slate-300">
+        <i class="fas fa-folder-open text-4xl text-slate-300 mb-3"></i>
+        <p class="text-slate-500 font-medium">目前尚無符合篩選條件的佐證項目</p>
+      </div>
+
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="item in filteredEvidence" :key="item.id" class="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200/80 flex flex-col group">
+          <div class="relative h-48 bg-slate-100 overflow-hidden">
+            <img :src="item.file_url || 'https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?auto=format&fit=crop&w=800&q=80'" :alt="item.title" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+            <div class="absolute top-3 left-3">
+              <span :class="getCategoryBadgeClass(item.category)" class="text-xs px-2.5 py-1 rounded-full font-bold shadow-sm">
+                {{ getCategoryName(item.category) }}
+              </span>
+            </div>
+            <div class="absolute bottom-2 right-3 text-[11px] bg-black/60 text-white px-2 py-0.5 rounded backdrop-blur-sm">
+              <i class="far fa-calendar-alt mr-1"></i>{{ item.event_date }}
+            </div>
+          </div>
+
+          <div class="p-5 flex-grow flex flex-col justify-between">
+            <div>
+              <div class="flex items-center text-xs text-slate-500 mb-2">
+                <i class="fas fa-map-marker-alt text-amber-500 mr-1.5"></i>
+                <span class="truncate">{{ item.location || '新竹法寶寺' }}</span>
+              </div>
+              <h4 class="text-base font-bold text-slate-900 group-hover:text-amber-600 transition leading-snug line-clamp-2">
+                {{ item.title }}
+              </h4>
+              <p class="text-slate-600 text-xs sm:text-sm mt-2.5 line-clamp-3 leading-relaxed">
+                {{ item.summary }}
+              </p>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span class="text-slate-400">登錄幹部：{{ item.created_by || '分團長 / 評鑑秘書' }}</span>
+              <button @click="openEvidenceModal(item)" class="text-amber-600 hover:text-amber-700 font-bold flex items-center space-x-1 group-hover:translate-x-0.5 transition">
+                <span>檢視佐證</span>
+                <i class="fas fa-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 健康打卡 VEGRUN 專區 -->
+    <section id="health" class="bg-gradient-to-b from-slate-100 to-amber-50/40 py-20 border-y border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+          <div>
+            <div class="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-2">Healthy Youth & VEGRUN</div>
+            <h3 class="text-3xl font-bold text-slate-900">青年健走跑步健康打卡牆</h3>
+            <p class="text-slate-600 mt-2 text-sm sm:text-base">
+              運動強身、蔬食減碳！記錄每一位新竹青年的步履，匯聚為地球與生命的慈悲力量。
+            </p>
+          </div>
+          <div class="mt-4 md:mt-0 flex items-center space-x-3">
+            <button @click="showHealthModal = true" class="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold shadow-md shadow-emerald-200 transition flex items-center space-x-2 text-sm">
+              <i class="fas fa-plus-circle"></i>
+              <span>登記我的打卡</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-emerald-100 flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+              <i class="fas fa-shoe-prints"></i>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-slate-900">{{ healthStats.total_steps ? healthStats.total_steps.toLocaleString() : '32,000' }}</div>
+              <div class="text-xs text-slate-500">累積總步數 (Steps)</div>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-emerald-100 flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center text-xl shrink-0">
+              <i class="fas fa-road"></i>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-slate-900">{{ healthStats.total_km || '22.5' }} km</div>
+              <div class="text-xs text-slate-500">累積總公里數 (Kilometers)</div>
+            </div>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl shadow-sm border border-emerald-100 flex items-center space-x-4">
+            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shrink-0">
+              <i class="fas fa-users-cog"></i>
+            </div>
+            <div>
+              <div class="text-2xl font-bold text-slate-900">{{ healthStats.unique_members || '5' }} 位</div>
+              <div class="text-xs text-slate-500">參與打卡青年人數</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div v-for="log in healthLogs" :key="log.id" class="bg-white p-4 rounded-xl shadow-sm border border-slate-200/80 flex items-start space-x-3.5">
+            <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm shrink-0">
+              {{ log.participant_name ? log.participant_name.charAt(0) : '青' }}
+            </div>
+            <div class="flex-grow">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-slate-900 text-sm">{{ log.participant_name }}</span>
+                <span class="text-[11px] text-slate-400">{{ log.log_date }}</span>
+              </div>
+              <div class="flex items-center space-x-3 my-1 text-xs">
+                <span class="text-emerald-600 font-semibold flex items-center">
+                  <i class="fas fa-running mr-1"></i>{{ log.distance_km }} km
+                </span>
+                <span v-if="log.steps" class="text-slate-500">
+                  <i class="fas fa-walking mr-1"></i>{{ log.steps }} 步
+                </span>
+                <span class="px-1.5 py-0.2 rounded bg-slate-100 text-[10px] text-slate-600 font-medium">
+                  {{ log.activity_type === 'run' ? '跑步' : (log.activity_type === 'ride' ? '騎行' : '健走') }}
+                </span>
+              </div>
+              <p v-if="log.note" class="text-xs text-slate-600 bg-slate-50 p-2 rounded-lg mt-1 italic">
+                “{{ log.note }}”
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 幹部團隊名冊專區 -->
+    <section id="team" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <div class="text-xs font-bold uppercase tracking-widest text-amber-600 mb-2">Cadre Leadership</div>
+        <h3 class="text-3xl font-bold text-slate-900">新竹青年分團幹部團隊</h3>
+        <p class="text-slate-600 mt-2 text-sm sm:text-base">集體創作、制度領導、傳承願力，服務新竹在地青年。</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div v-for="member in teamMembers" :key="member.id" class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-lg border border-slate-200 transition text-center flex flex-col items-center">
+          <div class="w-24 h-24 rounded-full overflow-hidden shadow-inner border-2 border-amber-300 mb-4 bg-slate-100">
+            <img :src="member.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'" :alt="member.name" class="w-full h-full object-cover">
+          </div>
+          <span class="text-xs font-bold px-3 py-0.5 rounded-full bg-amber-100 text-amber-800 mb-2">{{ member.position }}</span>
+          <h4 class="text-lg font-bold text-slate-900">{{ member.name }}</h4>
+          <span class="text-xs text-slate-400 mt-0.5">{{ member.term || '第十二屆' }}</span>
+          <p class="text-slate-600 text-xs sm:text-sm mt-3 leading-relaxed flex-grow">
+            “{{ member.bio }}”
+          </p>
+          <div v-if="member.contact" class="mt-4 pt-3 border-t border-slate-100 w-full text-xs text-slate-500">
+            <i class="far fa-envelope mr-1 text-amber-500"></i>{{ member.contact }}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 頁腳 Footer -->
+    <footer id="contact" class="bg-slate-900 text-white pt-16 pb-8 border-t border-slate-800">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-slate-800">
+          <div class="md:col-span-2 space-y-4">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center text-white text-xl">
+                <i class="fas fa-dharmachakra"></i>
+              </div>
+              <span class="text-lg font-bold">{{ blocks.site_title || '國際佛光會新竹青年分團' }}</span>
+            </div>
+            <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-md">
+              以文化弘揚佛法，以教育培養人才，以慈善福利社會，以共修淨化人心。歡迎有志青年加入我們的行列！
+            </p>
+            <div class="pt-2">
+              <span class="text-xs font-semibold uppercase text-amber-400 tracking-wider">特色影音頻道：</span>
+              <p class="text-xs text-slate-300 mt-1">《新竹佛光青年X竹光三參》 - 專屬新竹青年的生活思辨與心靈加油站，用幽默接地氣的視角聊佛法、談職場、玩生活。</p>
+            </div>
+          </div>
+
+          <div class="space-y-3 text-xs sm:text-sm">
+            <h5 class="text-sm font-bold text-amber-400 uppercase tracking-wider">道場據點與聯絡</h5>
+            <p class="text-slate-300"><i class="fas fa-synagogue mr-2 text-amber-400"></i>{{ blocks.contact_temple || '佛光山新竹法寶寺' }}</p>
+            <p class="text-slate-300"><i class="fas fa-map-marker-alt mr-2 text-amber-400"></i>{{ blocks.contact_address || '新竹市東區民族路 241 巷 1 號' }}</p>
+            <p class="text-slate-300"><i class="fas fa-phone mr-2 text-amber-400"></i>{{ blocks.contact_phone || '03-5325566' }}</p>
+            <p class="text-slate-300"><i class="fas fa-envelope mr-2 text-amber-400"></i>{{ blocks.contact_email || 'hsinchu.blia.youth@gmail.com' }}</p>
+          </div>
+
+          <div class="space-y-3 text-xs sm:text-sm">
+            <h5 class="text-sm font-bold text-amber-400 uppercase tracking-wider">系統與管理入口</h5>
+            <ul class="space-y-2 text-slate-400">
+              <li><a href="/admin" class="hover:text-amber-300 transition"><i class="fas fa-shield-alt mr-1"></i>後台 CMS 管理系統</a></li>
+              <li><a href="/docs" target="_blank" class="hover:text-amber-300 transition"><i class="fas fa-code mr-1"></i>FastAPI 官方 Swagger API 文件</a></li>
+              <li><a href="#health" class="hover:text-amber-300 transition"><i class="fas fa-heartbeat mr-1"></i>VEGRUN 健走打卡</a></li>
+              <li><button @click="showLoginModal = true" class="hover:text-amber-300 transition"><i class="fas fa-key mr-1"></i>幹部快速登入</button></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
+          <p>© 2026 國際佛光會中華青年總會 新竹青年分團 版權所有</p>
+          <p class="mt-2 sm:mt-0">本地高效 SQLite + FastAPI 系統架構・資料庫安全存於道場主機</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- 佐證詳細 Modal -->
+    <div v-if="selectedEvidence" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="selectedEvidence = null">
+      <div class="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div class="flex items-center space-x-2">
+            <span :class="getCategoryBadgeClass(selectedEvidence.category)" class="text-xs px-2.5 py-1 rounded-full font-bold">
+              {{ getCategoryName(selectedEvidence.category) }}
+            </span>
+            <span v-if="selectedEvidence.evaluation_code" class="text-xs px-2 py-0.5 rounded-full font-bold bg-amber-100 text-amber-900 border border-amber-300">
+              指標：{{ selectedEvidence.evaluation_code }}
+            </span>
+          </div>
+          <button @click="selectedEvidence = null" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        </div>
+
+        <h3 class="text-xl font-bold text-slate-900 mt-4">{{ selectedEvidence.title }}</h3>
+        
+        <div class="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-2">
+          <span><i class="far fa-calendar-alt mr-1 text-amber-500"></i>活動日期：{{ selectedEvidence.event_date }}</span>
+          <span><i class="fas fa-map-marker-alt mr-1 text-amber-500"></i>活動地點：{{ selectedEvidence.location || '新竹法寶寺' }}</span>
+          <span><i class="fas fa-user-edit mr-1 text-amber-500"></i>記錄幹部：{{ selectedEvidence.created_by || '分團長 / 評鑑秘書' }}</span>
+        </div>
+
+        <div v-if="selectedEvidence.file_url" class="my-4 bg-slate-50 rounded-xl overflow-hidden border border-slate-200">
+          <div v-if="selectedEvidence.file_type === 'image' || !selectedEvidence.file_type" class="max-h-80 overflow-hidden flex items-center justify-center bg-black/5">
+            <img :src="selectedEvidence.file_url" :alt="selectedEvidence.title" class="object-contain max-h-80 w-auto">
+          </div>
+          <div v-else class="p-6 text-center">
+            <i class="fas fa-file-pdf text-red-500 text-5xl"></i>
+            <p class="font-semibold text-slate-800 text-sm mt-3">{{ selectedEvidence.original_filename || '活動佐證公文附件' }}</p>
+            <a :href="selectedEvidence.file_url" target="_blank" download class="inline-flex items-center space-x-1.5 mt-3 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold transition">
+              <i class="fas fa-download"></i>
+              <span>下載佐證檔案</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">成果摘要與活動成效</h4>
+          <p class="text-sm text-slate-700 mt-1 leading-relaxed bg-amber-50/50 p-4 rounded-xl border border-amber-100">
+            {{ selectedEvidence.summary }}
+          </p>
+        </div>
+
+        <div class="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+          <button @click="selectedEvidence = null" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs rounded-xl transition">
+            關閉視窗
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 健康打卡填寫 Modal -->
+    <div v-if="showHealthModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="showHealthModal = false">
+      <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl p-6">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h3 class="text-lg font-bold text-slate-900 flex items-center space-x-2">
+            <i class="fas fa-running text-emerald-500"></i>
+            <span>登記健走跑步打卡</span>
+          </h3>
+          <button @click="showHealthModal = false" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        </div>
+
+        <form @submit.prevent="submitHealthLog" class="mt-4 space-y-4 text-sm">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">青年姓名 / 稱謂 *</label>
+            <input v-model="newHealthLog.participant_name" required type="text" placeholder="例：林冠宇、新竹青年義工" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">運動類型</label>
+              <select v-model="newHealthLog.activity_type" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                <option value="walk">健走 (Walk)</option>
+                <option value="run">跑步 (Run)</option>
+                <option value="ride">騎行 (Ride)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">打卡日期 *</label>
+              <input v-model="newHealthLog.log_date" required type="date" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">里程數 (公里 KM) *</label>
+              <input v-model.number="newHealthLog.distance_km" required step="0.1" min="0.1" type="number" placeholder="例：3.5" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-700 mb-1">步數 (非必填)</label>
+              <input v-model.number="newHealthLog.steps" type="number" placeholder="例：5000" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">心得分享 / 三好金句</label>
+            <textarea v-model="newHealthLog.note" rows="2" placeholder="例：今天在十八尖山晨跑，身心清淨，蔬食愛地球！" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none"></textarea>
+          </div>
+
+          <div class="pt-2 flex justify-end space-x-3">
+            <button type="button" @click="showHealthModal = false" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg text-xs font-semibold">取消</button>
+            <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow transition">送出打卡</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 幹部登入 Modal -->
+    <div v-if="showLoginModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="showLoginModal = false">
+      <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl p-6">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h3 class="text-base font-bold text-slate-900 flex items-center space-x-2">
+            <i class="fas fa-lock text-amber-500"></i>
+            <span>分團幹部系統登入</span>
+          </h3>
+          <button @click="showLoginModal = false" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        </div>
+
+        <form @submit.prevent="login" class="mt-4 space-y-4 text-sm">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">幹部帳號 (Username)</label>
+            <input v-model="loginForm.username" required type="text" placeholder="例：admin 或 cadre" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">密碼 (Password)</label>
+            <input v-model="loginForm.password" required type="password" placeholder="請輸入密碼" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:outline-none">
+          </div>
+
+          <div v-if="loginError" class="p-2.5 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-lg">
+            {{ loginError }}
+          </div>
+
+          <div class="pt-2 flex flex-col space-y-2">
+            <button type="submit" class="w-full py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-bold text-xs shadow transition">
+              安全登入
+            </button>
+            <span class="text-[11px] text-center text-slate-400">預設管理員：admin / 密碼：blia123456</span>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        const blocks = ref({});
+        const evidenceList = ref([]);
+        const teamMembers = ref([]);
+        const healthLogs = ref([]);
+        const healthStats = ref({});
+        const currentCategory = ref('');
+        const searchKeyword = ref('');
+        const selectedEvidence = ref(null);
+
+        // Modal 控制
+        const showLoginModal = ref(false);
+        const showHealthModal = ref(false);
+        const loginError = ref('');
+        const loginForm = ref({ username: '', password: '' });
+        const currentUser = ref(null);
+
+        // 新增打卡表單
+        const newHealthLog = ref({
+          participant_name: '',
+          activity_type: 'walk',
+          log_date: new Date().toISOString().split('T')[0],
+          distance_km: 3.0,
+          steps: 4500,
+          note: ''
+        });
+
+        // 載入全站動態區塊字典
+        const fetchBlocks = async () => {
+          try {
+            const res = await fetch('/api/blocks/dict');
+            if (res.ok) blocks.value = await res.json();
+          } catch (e) {
+            console.error('Fetch blocks error:', e);
+          }
+        };
+
+        // 載入四大宗旨佐證資料
+        const fetchEvidence = async () => {
+          try {
+            const res = await fetch('/api/evidence');
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data) && data.length > 0) {
+                evidenceList.value = data;
+              }
+            }
+          } catch (e) {
+            console.error('Fetch evidence error:', e);
+          }
+        };
+
+        // 載入幹部團隊
+        const fetchTeam = async () => {
+          try {
+            const res = await fetch('/api/team');
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data) && data.length > 0) {
+                teamMembers.value = data;
+              }
+            }
+          } catch (e) {
+            console.error('Fetch team error:', e);
+          }
+        };
+
+        // 載入健康打卡與統計
+        const fetchHealth = async () => {
+          try {
+            const [logsRes, statsRes] = await Promise.all([
+              fetch('/api/health?limit=20'),
+              fetch('/api/health/stats')
+            ]);
+            if (logsRes.ok) {
+              const logs = await logsRes.json();
+              if (Array.isArray(logs) && logs.length > 0) healthLogs.value = logs;
+            }
+            if (statsRes.ok) healthStats.value = await statsRes.json();
+          } catch (e) {
+            console.error('Fetch health error:', e);
+          }
+        };
+
+        // 檢查當前登入狀態
+        const checkAuth = async () => {
+          const token = localStorage.getItem('blia_token');
+          if (!token) return;
+          try {
+            const res = await fetch('/api/auth/me', {
+              headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) {
+              currentUser.value = await res.json();
+            } else {
+              localStorage.removeItem('blia_token');
+            }
+          } catch (e) {
+            localStorage.removeItem('blia_token');
+          }
+        };
+
+        // 登入處理
+        const login = async () => {
+          loginError.value = '';
+          try {
+            const res = await fetch('/api/auth/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(loginForm.value)
+            });
+            const data = await res.json();
+            if (res.ok) {
+              localStorage.setItem('blia_token', data.access_token);
+              localStorage.setItem('blia_user', JSON.stringify(data));
+              currentUser.value = data;
+              showLoginModal.value = false;
+              window.location.href = '/admin';
+            } else {
+              loginError.value = data.detail || '登入失敗，請確認帳號密碼';
+            }
+          } catch (e) {
+            loginError.value = '連線至道場伺服器發生錯誤';
+          }
+        };
+
+        // 提交打卡
+        const submitHealthLog = async () => {
+          try {
+            const res = await fetch('/api/health', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(newHealthLog.value)
+            });
+            if (res.ok) {
+              alert('打卡成功！感謝您為地球與健康發心！');
+              showHealthModal.value = false;
+              fetchHealth();
+              newHealthLog.value.note = '';
+            } else {
+              alert('打卡失敗，請檢查輸入數值');
+            }
+          } catch (e) {
+            alert('送出發生錯誤');
+          }
+        };
+
+        // 篩選佐證列表
+        const filteredEvidence = computed(() => {
+          return evidenceList.value.filter(item => {
+            const matchCat = !currentCategory.value || item.category === currentCategory.value;
+            const matchKw = !searchKeyword.value || 
+              item.title.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
+              item.summary.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
+              (item.location && item.location.toLowerCase().includes(searchKeyword.value.toLowerCase()));
+            return matchCat && matchKw;
+          });
+        });
+
+        const countCategory = (cat) => {
+          return evidenceList.value.filter(i => i.category === cat).length;
+        };
+
+        const getCategoryName = (cat) => {
+          const map = { culture: '文化弘法', education: '教育培力', cultivation: '共修淨心', charity: '慈善福田' };
+          return map[cat] || cat;
+        };
+
+        const getCategoryBadgeClass = (cat) => {
+          const map = {
+            culture: 'bg-amber-100 text-amber-800 border border-amber-300',
+            education: 'bg-blue-100 text-blue-800 border border-blue-300',
+            cultivation: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
+            charity: 'bg-rose-100 text-rose-800 border border-rose-300'
+          };
+          return map[cat] || 'bg-slate-100 text-slate-800';
+        };
+
+        const openEvidenceModal = (item) => {
+          selectedEvidence.value = item;
+        };
+
+        onMounted(() => {
+          fetchBlocks();
+          fetchEvidence();
+          fetchTeam();
+          fetchHealth();
+          checkAuth();
+        });
+
+        return {
+          blocks,
+          evidenceList,
+          teamMembers,
+          healthLogs,
+          healthStats,
+          currentCategory,
+          searchKeyword,
+          filteredEvidence,
+          selectedEvidence,
+          showLoginModal,
+          showHealthModal,
+          loginError,
+          loginForm,
+          currentUser,
+          newHealthLog,
+          login,
+          submitHealthLog,
+          countCategory,
+          getCategoryName,
+          getCategoryBadgeClass,
+          openEvidenceModal
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

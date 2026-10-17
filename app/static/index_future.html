@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>國際佛光會新竹青年分團 - 成果展示與青年生活數位平台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.21/vue.global.prod.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#D97706">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            blia: {
+              gold: '#D97706',
+              amber: '#F59E0B',
+              dark: '#0F172A',
+              cream: '#FFFBEB',
+              orange: '#EA580C'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    [v-cloak] { display: none; }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+    }
+    .dark body, .dark #app {
+      background-color: #0b0f19 !important;
+      color: #f1f5f9 !important;
+    }
+    .dark .bg-slate-50 {
+      background-color: #0b0f19 !important;
+    }
+    .dark .bg-white {
+      background-color: #151d2f !important;
+      border-color: #1e293b !important;
+      color: #f8fafc !important;
+    }
+    .dark .text-slate-900, .dark .text-slate-800 {
+      color: #f8fafc !important;
+    }
+    .dark .text-slate-600, .dark .text-slate-500 {
+      color: #94a3b8 !important;
+    }
+    .dark header {
+      background-color: rgba(15, 23, 42, 0.95) !important;
+      border-color: #1e293b !important;
+    }
+    .dark .border-slate-200, .dark .border-slate-100 {
+      border-color: #1e293b !important;
+    }
+    .dark .bg-slate-100 {
+      background-color: #1e293b !important;
+    }
+    .accessible-mode {
+      font-size: 1.15rem !important;
+    }
+    .accessible-mode body, .accessible-mode div, .accessible-mode p {
+      color: #000000 !important;
+      line-height: 1.8 !important;
+    }
+    .accessible-mode h1, .accessible-mode h2, .accessible-mode h3, .accessible-mode h4 {
+      font-weight: 900 !important;
+      color: #000000 !important;
+    }
+    .accessible-mode button, .accessible-mode a {
+      font-size: 1.05rem !important;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased font-sans min-h-screen flex flex-col">
+  <div id="app" v-cloak class="flex-grow flex flex-col">
+
+    <!-- 頂部即時公告跑馬燈 (動態串接 SiteAnnouncement) -->
+    <div v-if="marqueeList.length > 0 || blocks.announcement_enabled === 'true'" class="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 text-white text-xs sm:text-sm py-2 px-4 shadow-sm flex items-center justify-between sticky top-0 z-50">
+      <div class="max-w-7xl mx-auto w-full flex items-center justify-between gap-3">
+        <div class="flex items-center space-x-2 truncate">
+          <span class="bg-white/25 text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider shrink-0 animate-pulse">即時快訊</span>
+          <span class="truncate font-medium">
+            {{ activeMarquee ? activeMarquee.title + '：' + activeMarquee.content : (blocks.announcement_text || '歡迎蒞臨國際佛光會新竹青年分團！') }}
+          </span>
+        </div>
+        <div class="flex items-center space-x-2 shrink-0">
+          <button v-if="marqueeList.length > 1" @click="nextMarquee" class="text-white/80 hover:text-white text-xs px-2 py-0.5 rounded bg-white/10 hover:bg-white/20 transition">
+            下一則 <i class="fas fa-chevron-right text-[10px]"></i>
+          </button>
+          <a :href="blocks.announcement_link || '#aims'" class="text-[11px] bg-white text-amber-900 font-bold px-3 py-1 rounded-full shadow hover:bg-amber-100 transition whitespace-nowrap">
+            立即了解 <i class="fas fa-arrow-right ml-0.5 text-[10px]"></i>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 導航列 Header -->
+    <header class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md sticky top-0 z-40 border-b border-amber-100 dark:border-slate-800 shadow-sm transition">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        
+        <!-- 品牌 LOGO -->
+        <a href="#" class="flex items-center space-x-3 group">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-md shadow-amber-300 group-hover:scale-105 transition">
+            <i class="fas fa-dharmachakra text-2xl animate-spin-slow"></i>
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-black text-slate-900 dark:text-white tracking-wide flex items-center">
+              {{ blocks.site_title || '國際佛光會新竹青年分團' }}
+              <span class="ml-2 text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">公開平台</span>
+            </h1>
+            <p class="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">{{ blocks.site_subtitle || '佛教青年的活力新基地・以智慧生活・用慈悲行願' }}</p>
+          </div>
+        </a>
+
+        <!-- 導航選單 (涵蓋全部前台公開功能) -->
+        <nav class="hidden xl:flex items-center space-x-6 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <a href="#aims" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-compass text-amber-500"></i><span>四大宗旨</span>
+          </a>
+          <a href="#countdown" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-hourglass-half text-orange-500"></i><span>活動倒數</span>
+          </a>
+          <a href="#podcasts" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-podcast text-purple-500"></i><span>竹光Podcast</span>
+          </a>
+          <a href="#recipes" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-leaf text-emerald-500"></i><span>蔬食食譜</span>
+          </a>
+          <a href="#zen" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-spa text-amber-600"></i><span>生活禪</span>
+          </a>
+          <a href="#tea" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-mug-hot text-amber-700"></i><span>生活茶席</span>
+          </a>
+          <a href="#carpool" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-car text-teal-500"></i><span>青年共乘</span>
+          </a>
+          <a href="#wishlist" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-heart text-rose-500"></i><span>許願池</span>
+          </a>
+          <a href="#lostfound" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-search-location text-sky-500"></i><span>失物招領</span>
+          </a>
+          <a href="#donations" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-hand-holding-heart text-amber-600"></i><span>徵信芳名錄</span>
+          </a>
+          <a href="#faq" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-question-circle text-blue-500"></i><span>常見問題</span>
+          </a>
+          <a href="#partners" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-store text-emerald-600"></i><span>特約商家</span>
+          </a>
+          <a href="#team" class="hover:text-amber-600 transition flex items-center space-x-1">
+            <i class="fas fa-users text-indigo-500"></i><span>幹部團隊</span>
+          </a>
+        </nav>
+
+        <!-- 工具列按鈕 -->
+        <div class="flex items-center space-x-2 sm:space-x-2.5">
+          <!-- 抽福慧籤 -->
+          <button @click="openWisdomModal" class="text-xs px-2.5 sm:px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 font-bold transition flex items-center space-x-1" title="抽取今日星雲大師福慧籤卡">
+            <i class="fas fa-magic text-amber-600"></i>
+            <span class="hidden md:inline">抽福慧籤</span>
+          </button>
+
+          <!-- 百項大滿貫白皮書 -->
+          <button @click="openCentenaryModal" class="text-xs px-2.5 sm:px-3 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-black shadow-sm hover:shadow transition flex items-center space-x-1" title="查看 100 項功能大滿貫弘法成效白皮書">
+            <i class="fas fa-crown text-amber-950"></i>
+            <span class="hidden sm:inline">百項大滿貫</span>
+          </button>
+
+          <!-- 行事曆即時同步 -->
+          <button @click="openCalendarSyncModal" class="text-xs px-2.5 sm:px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold transition flex items-center space-x-1" title="行事曆即時同步訂閱">
+            <i class="fas fa-calendar-check text-indigo-600"></i>
+            <span class="hidden lg:inline">行事曆同步</span>
+          </button>
+
+          <!-- 深色模式 -->
+          <button @click="toggleDarkMode" class="text-xs px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:text-amber-400 font-bold transition" title="切換深色/淺色模式">
+            <span>{{ isDarkMode ? '☀️' : '🌙' }}</span>
+          </button>
+
+          <!-- 無障礙大字版 -->
+          <button @click="toggleAccessibleMode" :class="isAccessibleMode ? 'bg-indigo-900 text-amber-300 ring-2 ring-amber-400' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'" class="text-xs px-2.5 py-2 rounded-xl font-bold transition flex items-center space-x-1" title="切換友善大字版型">
+            <i class="fas fa-universal-access text-amber-500"></i>
+            <span class="hidden sm:inline">{{ isAccessibleMode ? '標準字' : '大字' }}</span>
+          </button>
+
+          <!-- 後台 CMS 入口 / 登入按鈕 -->
+          <a href="/admin" class="text-xs px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow transition flex items-center space-x-1.5">
+            <i class="fas fa-shield-alt text-amber-400"></i>
+            <span>{{ currentUser ? '進入後台' : '管理登入' }}</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- 主視覺 Hero Banner 區塊 -->
+    <section class="relative bg-gradient-to-b from-amber-50 via-orange-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 py-16 sm:py-20 overflow-hidden border-b border-amber-100 dark:border-slate-800 transition">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+          
+          <div class="lg:col-span-7 space-y-5 text-center lg:text-left">
+            <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-amber-100 dark:bg-amber-950/60 border border-amber-300 dark:border-amber-700 text-amber-800 dark:text-amber-300 text-xs font-bold">
+              <span class="w-2 h-2 rounded-full bg-amber-500 animate-ping"></span>
+              <span>{{ blocks.hero_badge || '2026 年度成果評鑑暨百項大滿貫數位平台' }}</span>
+            </div>
+
+            <h2 class="text-3xl sm:text-5xl font-black text-slate-900 dark:text-white leading-tight">
+              {{ blocks.hero_heading || '凝聚青年力量・實踐三好四給' }}
+            </h2>
+
+            <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">
+              {{ blocks.hero_description || '深耕新竹在地，連結大專青年與竹科新貴。秉持佛光山星雲大師四大宗旨「以文化弘揚佛法、以教育培養人才、以慈善福利社會、以共修淨化人心」，展現新竹青年的朝氣與實踐行動。' }}
+            </p>
+
+            <div class="pt-2 flex flex-wrap items-center justify-center lg:justify-start gap-3">
+              <a href="#aims" class="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center space-x-1.5">
+                <i class="fas fa-search-plus"></i>
+                <span>探索四大宗旨佐證庫</span>
+              </a>
+              <a href="#podcasts" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center space-x-1.5">
+                <i class="fas fa-podcast"></i>
+                <span>收聽《竹光三參》</span>
+              </a>
+              <a href="#zen" class="px-5 py-2.5 rounded-xl bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-bold text-xs sm:text-sm border border-slate-300 dark:border-slate-700 shadow-sm transition flex items-center space-x-1.5">
+                <i class="fas fa-spa text-amber-500"></i>
+                <span>生活禪靜心</span>
+              </a>
+              <button @click="showHealthModal = true" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md transition flex items-center space-x-1.5">
+                <i class="fas fa-running"></i>
+                <span>VEGRUN 打卡</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 relative">
+            <div class="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 bg-slate-200 aspect-video lg:aspect-[4/3] group">
+              <img :src="blocks.hero_banner_image || 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80'" alt="Banner" class="w-full h-full object-cover group-hover:scale-105 transition duration-700">
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/30 to-transparent flex flex-col justify-end p-6 text-white">
+                <div class="text-[10px] uppercase tracking-widest text-amber-300 font-extrabold">BLIA Hsinchu Youth</div>
+                <div class="text-base font-black">做好事・說好話・存好心</div>
+                <div class="text-xs text-slate-300">給人信心・給人歡喜・給人希望・給人方便</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- 【功能 47】重大活動節慶倒數看板 (Countdown Events) -->
+    <section id="countdown" v-if="countdownEvents.length > 0" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-30 mb-8">
+      <div class="bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 rounded-3xl p-6 text-white shadow-xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/20 gap-3">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-hourglass-half text-amber-200 text-xl animate-spin-slow"></i>
+            <div>
+              <h3 class="text-lg font-black tracking-wide">重大活動與節慶倒數看板 (功能 47)</h3>
+              <p class="text-xs text-amber-100">國際佛光會總會與新竹法寶寺年度重點盛事日程</p>
+            </div>
+          </div>
+          <span class="text-xs bg-white/20 px-3 py-1 rounded-full font-bold">共 {{ countdownEvents.length }} 場盛事籌備中</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+          <div v-for="ev in countdownEvents" :key="ev.id" class="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between mb-1 text-xs">
+                <span class="px-2 py-0.5 rounded-full bg-white text-amber-900 font-bold text-[10px]">{{ ev.category }}</span>
+                <span class="font-mono text-amber-200 text-[11px]">{{ ev.target_date?.slice(0, 10) }}</span>
+              </div>
+              <h4 class="font-bold text-white text-sm mt-1">{{ ev.title }}</h4>
+              <p class="text-xs text-amber-100/80 mt-1 line-clamp-2 leading-relaxed">{{ ev.description }}</p>
+            </div>
+            <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+              <span class="text-[11px] text-amber-200">{{ ev.status_text || '倒數進行中' }}</span>
+              <div class="font-mono text-base font-black text-amber-200">
+                {{ ev.days_left }} 天 {{ ev.hours_left }} 時 {{ ev.minutes_left }} 分
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 看板數值統計 Cards (連動後台 BlocksData) -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 relative z-20">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="glass-card p-5 rounded-2xl shadow-sm border border-amber-100 dark:border-slate-800 flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center text-xl shrink-0">
+            <i class="fas fa-user-friends"></i>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">{{ blocks.stat_youth_members || '128' }}</div>
+            <div class="text-xs font-medium text-slate-500">活躍青年團員數</div>
+          </div>
+        </div>
+
+        <div class="glass-card p-5 rounded-2xl shadow-sm border border-amber-100 dark:border-slate-800 flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-xl shrink-0">
+            <i class="fas fa-calendar-check"></i>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">{{ blocks.stat_total_events || '36' }}</div>
+            <div class="text-xs font-medium text-slate-500">年度舉辦活動場次</div>
+          </div>
+        </div>
+
+        <div class="glass-card p-5 rounded-2xl shadow-sm border border-amber-100 dark:border-slate-800 flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-xl shrink-0">
+            <i class="fas fa-hands-helping"></i>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">{{ blocks.stat_service_hours || '1,280' }}</div>
+            <div class="text-xs font-medium text-slate-500">志工服務時數 (hr)</div>
+          </div>
+        </div>
+
+        <div class="glass-card p-5 rounded-2xl shadow-sm border border-amber-100 dark:border-slate-800 flex items-center space-x-4">
+          <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl shrink-0">
+            <i class="fas fa-route"></i>
+          </div>
+          <div>
+            <div class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white">{{ healthStats.total_km || blocks.stat_vegrun_km || '520' }}</div>
+            <div class="text-xs font-medium text-slate-500">蔬食健走里程 (KM)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 四大宗旨佐證成果庫專區 (#aims) -->
+    <section id="aims" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200 dark:border-slate-800">
+      <div class="text-center max-w-3xl mx-auto mb-10">
+        <div class="text-xs font-bold uppercase tracking-widest text-amber-600 mb-2">Four Great Objectives Evaluation</div>
+        <h3 class="text-3xl font-bold text-slate-900 dark:text-white">四大宗旨成果佐證檔案庫</h3>
+        <p class="text-slate-600 dark:text-slate-400 mt-2 text-xs sm:text-sm">
+          {{ blocks.four_aims_intro || '依循星雲大師創會宗旨，將人間佛教落實在生活每處細節，以下為分團各項具體推動成果、評鑑指標代碼與公文檔案歸檔。' }}
+        </p>
+      </div>
+
+      <!-- 四大宗旨五育均衡佔比看板 -->
+      <div v-if="radarStats.radar_data" class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 mb-10 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700 gap-3">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-chart-pie text-amber-500"></i>
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">四大宗旨五育均衡實踐指數</h4>
+          </div>
+          <div class="flex items-center space-x-3 text-xs">
+            <span class="px-3 py-1 bg-amber-50 text-amber-900 rounded-full font-bold border border-amber-200">
+              三好實踐指數：{{ radarStats.balance_index }} 分
+            </span>
+            <span class="px-3 py-1 bg-emerald-50 text-emerald-800 rounded-full font-bold border border-emerald-200">
+              評核等級：{{ radarStats.evaluation_grade }}
+            </span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-1">
+          <div v-for="cat in radarStats.radar_data" :key="cat.category" class="p-3.5 rounded-2xl border border-slate-100 dark:border-slate-700 bg-slate-50/70 dark:bg-slate-900/50 space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-slate-800 dark:text-slate-200">{{ cat.name }}</span>
+              <span class="font-black" :style="{ color: cat.color }">{{ cat.percentage }}%</span>
+            </div>
+            <div class="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-500" :style="{ width: cat.percentage + '%', backgroundColor: cat.color }"></div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-0.5">
+              <span>{{ cat.events_count }} 場專案</span>
+              <span>受惠 {{ cat.participants ? cat.participants.toLocaleString() : 0 }} 人次</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 年度與分類篩選條 -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+        <div class="flex flex-wrap items-center justify-center gap-2 bg-slate-200/70 dark:bg-slate-800 p-1.5 rounded-2xl text-xs font-bold">
+          <button @click="currentCategory = ''" :class="currentCategory === '' ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'" class="px-4 py-2 rounded-xl transition">
+            全部宗旨 ({{ filteredByYearEvidence.length }})
+          </button>
+          <button @click="currentCategory = 'culture'" :class="currentCategory === 'culture' ? 'bg-amber-500 text-white shadow' : 'text-slate-600 dark:text-slate-400'" class="px-4 py-2 rounded-xl transition">
+            🌸 文化弘法
+          </button>
+          <button @click="currentCategory = 'education'" :class="currentCategory === 'education' ? 'bg-blue-600 text-white shadow' : 'text-slate-600 dark:text-slate-400'" class="px-4 py-2 rounded-xl transition">
+            📚 教育培力
+          </button>
+          <button @click="currentCategory = 'cultivation'" :class="currentCategory === 'cultivation' ? 'bg-emerald-600 text-white shadow' : 'text-slate-600 dark:text-slate-400'" class="px-4 py-2 rounded-xl transition">
+            🙏 共修淨心
+          </button>
+          <button @click="currentCategory = 'charity'" :class="currentCategory === 'charity' ? 'bg-rose-600 text-white shadow' : 'text-slate-600 dark:text-slate-400'" class="px-4 py-2 rounded-xl transition">
+            ❤️ 慈善福田
+          </button>
+        </div>
+
+        <div class="relative w-full sm:w-72">
+          <i class="fas fa-search absolute left-3 top-3 text-slate-400 text-sm"></i>
+          <input v-model="searchKeyword" type="text" placeholder="搜尋成果、代碼或地點..." class="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none shadow-sm">
+        </div>
+      </div>
+
+      <!-- 佐證成果卡片網格 -->
+      <div v-if="filteredEvidence.length === 0" class="text-center py-16 bg-white dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+        <i class="fas fa-folder-open text-4xl text-slate-300 mb-3"></i>
+        <p class="text-slate-500 text-xs font-bold">目前尚無符合篩選條件的佐證項目</p>
+      </div>
+
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="item in filteredEvidence" :key="item.id" class="bg-white dark:bg-slate-800 rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-700 flex flex-col justify-between group">
+          <div>
+            <div class="relative h-48 bg-slate-100 dark:bg-slate-900 overflow-hidden">
+              <img v-if="item.file_url && item.file_type === 'image'" :src="item.file_url" :alt="item.title" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+              <div v-else class="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-amber-50 dark:from-slate-800 dark:to-slate-900 text-slate-400">
+                <i :class="item.file_type === 'pdf' ? 'fas fa-file-pdf text-red-500 text-5xl' : 'fas fa-image text-slate-300 text-5xl'"></i>
+                <span class="text-xs font-bold mt-2 text-slate-500">{{ item.file_type === 'pdf' ? 'PDF 成果公文檔案' : '活動成果存檔' }}</span>
+              </div>
+
+              <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
+                <span :class="getCategoryBadgeClass(item.category)" class="text-[11px] px-2.5 py-1 rounded-full font-bold shadow-sm">
+                  {{ getCategoryName(item.category) }}
+                </span>
+                <span v-if="item.evaluation_code" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-slate-900/80 text-amber-300 border border-amber-400/40 shadow-sm backdrop-blur-sm">
+                  {{ item.evaluation_code }}
+                </span>
+              </div>
+
+              <div class="absolute bottom-2 right-3 text-[11px] bg-black/60 text-white px-2 py-0.5 rounded backdrop-blur-sm">
+                <i class="far fa-calendar-alt mr-1"></i>{{ item.event_date }}
+              </div>
+            </div>
+
+            <div class="p-5 space-y-2">
+              <div class="flex items-center text-xs text-slate-500">
+                <i class="fas fa-map-marker-alt text-amber-500 mr-1.5"></i>
+                <span class="truncate">{{ item.location || '新竹法寶寺' }}</span>
+              </div>
+              <h4 class="text-base font-bold text-slate-900 dark:text-white group-hover:text-amber-600 transition leading-snug line-clamp-2">
+                {{ item.title }}
+              </h4>
+              <p class="text-slate-600 dark:text-slate-300 text-xs mt-2 line-clamp-3 leading-relaxed">
+                {{ item.summary }}
+              </p>
+
+              <div class="mt-3 pt-2 border-t border-slate-100 dark:border-slate-700 flex flex-wrap items-center gap-2 text-[11px]">
+                <span v-if="item.participants_count > 0" class="px-2 py-0.5 rounded bg-amber-50 text-amber-800 font-semibold border border-amber-200">
+                  <i class="fas fa-users mr-1"></i>參與 {{ item.participants_count }} 人
+                </span>
+                <span v-if="item.volunteers_count > 0" class="px-2 py-0.5 rounded bg-blue-50 text-blue-800 font-semibold border border-blue-200">
+                  <i class="fas fa-hands-helping mr-1"></i>義工 {{ item.volunteers_count }} 人
+                </span>
+                <span v-if="item.satisfaction_rate" class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200">
+                  <i class="fas fa-star mr-1"></i>{{ item.satisfaction_rate }}%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="p-5 pt-0 border-t border-slate-100 dark:border-slate-700/60 mt-2 flex items-center justify-between text-xs">
+            <a :href="'/api/evidence/' + item.id + '/export-pdf'" target="_blank" class="text-rose-600 hover:underline font-bold flex items-center space-x-1">
+              <i class="fas fa-file-pdf"></i><span>下載A4提報單</span>
+            </a>
+            <button @click="openEvidenceModal(item)" class="text-amber-600 hover:text-amber-700 font-bold flex items-center space-x-1">
+              <span>檢視詳情</span><i class="fas fa-arrow-right text-[10px]"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 【功能 83】佛光三好 Podcast《竹光三參》專區 (#podcasts) -->
+    <section id="podcasts" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200 dark:border-slate-800">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="text-xs font-bold uppercase tracking-widest text-purple-600 mb-2">Original Audio & Life Zen Podcast</div>
+        <h3 class="text-3xl font-bold text-slate-900 dark:text-white">《竹光三參》青年 Podcast 篇章專區</h3>
+        <p class="text-slate-600 dark:text-slate-400 mt-2 text-xs sm:text-sm">專屬新竹青年的生活思辨與心靈加油站，用聲音傳遞三好智慧，點亮科技城心靈光明。</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div v-for="pod in publicPodcasts" :key="pod.id" class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-xl transition">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="px-2.5 py-0.5 rounded font-mono font-bold bg-purple-600 text-white text-xs">{{ pod.episode_number }}</span>
+              <span class="text-xs font-mono text-slate-400"><i class="far fa-clock mr-1"></i>{{ pod.duration_minutes }} 分鐘</span>
+            </div>
+            <h4 class="font-extrabold text-slate-900 dark:text-white text-base leading-snug">{{ pod.title }}</h4>
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{{ pod.summary }}</p>
+            <div v-if="pod.chapter_timestamps" class="text-[11px] text-purple-700 dark:text-purple-300 font-mono bg-purple-50 dark:bg-purple-950/40 p-2.5 rounded-xl">
+              ⏱️ <strong>章節：</strong>{{ pod.chapter_timestamps }}
+            </div>
+            <div v-if="pod.key_quotes" class="text-xs text-amber-800 dark:text-amber-200 italic bg-amber-50 dark:bg-amber-950/40 p-2.5 rounded-xl border border-amber-200 dark:border-amber-800">
+              💬 <strong>大師金句：</strong>“{{ pod.key_quotes }}”
+            </div>
+          </div>
+          <button @click="speakText('正在收聽竹光三參 ' + pod.episode_number + '，' + pod.title + '。大師金句：' + pod.key_quotes)" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl text-xs font-bold transition shadow flex items-center justify-center space-x-1.5">
+            <i class="fas fa-play"></i>
+            <span>收聽本集精彩音訊</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 【功能 99】佛門茶水點心與蔬食環保菜單食譜庫 (#recipes) -->
+    <section id="recipes" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200 dark:border-slate-800">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-4">
+        <div>
+          <div class="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-2">Vegetarian Cuisine & Carbon Saving</div>
+          <h3 class="text-3xl font-bold text-slate-900 dark:text-white">佛門蔬食食譜庫・綠色低碳生活</h3>
+          <p class="text-slate-600 dark:text-slate-400 mt-2 text-xs sm:text-sm">法寶寺純素無肉低碳食譜，學會親手煮一碗三好香積麵，用每一餐守護地球環境。</p>
+        </div>
+        <div class="p-3 bg-emerald-50 dark:bg-emerald-950/50 rounded-2xl border border-emerald-200 dark:border-emerald-800 text-right shrink-0">
+          <span class="text-[10px] text-emerald-700 dark:text-emerald-300 font-bold block">全團蔬食累計總減碳量</span>
+          <span class="text-2xl font-black text-emerald-800 dark:text-emerald-200 font-mono">{{ recipeStats.total_carbon_saved_kg || 137.3 }} kg CO₂</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div v-for="r in publicRecipes" :key="r.id" class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between space-y-4 hover:shadow-xl transition">
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">{{ r.category }}</span>
+              <span class="text-xs font-bold text-emerald-600">省碳 {{ r.carbon_saving_estimate }} kg</span>
+            </div>
+            <h4 class="font-extrabold text-slate-900 dark:text-white text-base">{{ r.recipe_name }}</h4>
+            <div class="text-xs text-slate-500"><strong>食材：</strong>{{ r.ingredients }}</div>
+            <div class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
+              <strong>作法：</strong>{{ r.cooking_steps }}
+            </div>
+          </div>
+          <div class="pt-2 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between text-xs text-slate-400">
+            <span>難易度：{{ r.difficulty }}</span>
+            <span class="text-emerald-600 font-bold">健康純素無五辛</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 【功能 54】青年生活禪每日靜心打卡計時鐘 (#zen) -->
+    <section id="zen" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200 dark:border-slate-800">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="text-xs font-bold uppercase tracking-widest text-amber-600 mb-2">Daily Zen Mindfulness Timer</div>
+        <h3 class="text-3xl font-bold text-slate-900 dark:text-white">青年生活禪・每日靜心打卡計時鐘</h3>
+        <p class="text-slate-600 dark:text-slate-400 mt-2 text-xs sm:text-sm">安住當下，清涼自在。提供專屬青年沈澱雜念的冥想鐘聲、定時調息與心靈打卡存檔。</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+        <!-- 計時器卡片 -->
+        <div class="lg:col-span-7 bg-gradient-to-br from-amber-900 via-slate-900 to-amber-950 rounded-3xl p-8 text-white shadow-xl text-center relative overflow-hidden">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold mb-4 border border-amber-500/30">
+            <i class="fas fa-spa"></i>
+            <span>觀呼吸・吐納自在・覺照自心</span>
+          </div>
+
+          <div class="relative w-44 h-44 mx-auto my-3 flex items-center justify-center">
+            <div class="w-40 h-40 rounded-full border border-amber-300/30 bg-amber-950/40 backdrop-blur-md flex flex-col items-center justify-center shadow-inner">
+              <div class="text-4xl font-mono font-extrabold text-amber-300">
+                {{ String(Math.floor(zenTimer.remainingSeconds / 60)).padStart(2, '0') }}:{{ String(zenTimer.remainingSeconds % 60).padStart(2, '0') }}
+              </div>
+              <span class="text-[10px] text-amber-200/80 mt-1 uppercase tracking-widest">{{ zenTimer.isRunning ? '靜心中・思維清明' : '準備開始' }}</span>
+            </div>
+          </div>
+
+          <!-- 快速設定分鐘預設 -->
+          <div class="flex justify-center items-center gap-2 my-4 flex-wrap">
+            <button @click="setZenPreset(5)" :class="zenTimer.presetMinutes === 5 ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-white/10 text-slate-200'" class="px-3 py-1 rounded-xl text-xs transition">5 分鐘</button>
+            <button @click="setZenPreset(10)" :class="zenTimer.presetMinutes === 10 ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-white/10 text-slate-200'" class="px-3 py-1 rounded-xl text-xs transition">10 分鐘</button>
+            <button @click="setZenPreset(15)" :class="zenTimer.presetMinutes === 15 ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-white/10 text-slate-200'" class="px-3 py-1 rounded-xl text-xs transition">15 分鐘</button>
+            <button @click="setZenPreset(20)" :class="zenTimer.presetMinutes === 20 ? 'bg-amber-500 text-slate-950 font-bold' : 'bg-white/10 text-slate-200'" class="px-3 py-1 rounded-xl text-xs transition">20 分鐘</button>
+          </div>
+
+          <!-- 控制按鈕 -->
+          <div class="flex justify-center items-center space-x-3">
+            <button v-if="!zenTimer.isRunning" @click="startZenTimer" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 font-bold text-xs shadow-lg transition flex items-center space-x-1.5">
+              <i class="fas fa-play"></i><span>開始靜心</span>
+            </button>
+            <button v-else @click="pauseZenTimer" class="px-6 py-2.5 rounded-xl bg-amber-400 text-slate-950 font-bold text-xs shadow-lg transition flex items-center space-x-1.5">
+              <i class="fas fa-pause"></i><span>暫停計時</span>
+            </button>
+            <button @click="resetZenTimer" class="px-3.5 py-2.5 rounded-xl bg-white/10 text-slate-300 text-xs transition">
+              重置
+            </button>
+            <button @click="showZenModal = true" class="px-3.5 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-bold transition">
+              打卡留存
+            </button>
+          </div>
+        </div>
+
+        <!-- 靜心大數據與生活法語卡片 -->
+        <div class="lg:col-span-5 space-y-4">
+          <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-200 dark:border-slate-700 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-700">
+              <span class="text-xs font-bold text-slate-500 uppercase">今日大師生活禪語</span>
+              <span class="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">星雲說禪</span>
+            </div>
+            <p class="text-slate-800 dark:text-slate-200 font-serif text-base italic leading-relaxed">
+              「{{ zenStats.zen_quote || '心中有佛，所見皆佛；安住當下，清涼自在。' }}」
+            </p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-center">
+              <div class="text-xs text-slate-400">全團靜心人次</div>
+              <div class="text-2xl font-black text-amber-600 mt-1 font-mono">{{ zenStats.total_sessions || 27 }} 次</div>
+            </div>
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 text-center">
+              <div class="text-xs text-slate-400">靜修總時數</div>
+              <div class="text-2xl font-black text-indigo-600 mt-1 font-mono">{{ zenStats.total_hours || 5.5 }} 小時</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 【功能 86】生活茶席品茗預約與心靈茶帖 (#tea) -->
+    <section id="tea" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200 dark:border-slate-800">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="text-xs font-bold uppercase tracking-widest text-amber-700 mb-2">Drop of Water Tea House</div>
+        <h3 class="text-3xl font-bold text-slate-900 dark:text-white">佛光生活茶席・品茗預約與茶帖法語</h3>
+        <p class="text-slate-600 dark:text-slate-400 mt-2 text-xs sm:text-sm">茶禪一味，吃茶去！新竹法寶寺滴水坊生活茶席，在水沸與茶香中洗滌身心雜念，靜心品味當下。</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <!-- 預約表單 -->
+        <div class="lg:col-span-6 bg-gradient-to-br from-amber-900 via-stone-900 to-amber-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl space-y-4">
+          <div class="flex items-center space-x-2 text-amber-300 pb-2 border-b border-amber-500/30">
+            <i class="fas fa-mug-hot text-lg"></i>
+            <h4 class="text-base font-extrabold text-white">滴水坊生活茶席線上預約</h4>
+          </div>
+
+          <form @submit.prevent="submitTeaBooking" class="space-y-3 text-xs">
+            <div>
+              <label class="block font-bold text-amber-200 mb-1">預約茶友姓名</label>
+              <input v-model="teaForm.guest_name" required type="text" placeholder="例：陳冠宇" class="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block font-bold text-amber-200 mb-1">預約日期</label>
+                <input v-model="teaForm.booking_date" required type="date" class="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white">
+              </div>
+              <div>
+                <label class="block font-bold text-amber-200 mb-1">茶席時段</label>
+                <select v-model="teaForm.tea_time" class="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white">
+                  <option value="14:00 - 15:30">14:00 - 15:30</option>
+                  <option value="15:30 - 17:00">15:30 - 17:00</option>
+                  <option value="19:00 - 20:30">19:00 - 20:30</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block font-bold text-amber-200 mb-1">精選茶品</label>
+                <select v-model="teaForm.tea_variety" class="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white">
+                  <option value="東方美人茶">新竹北埔東方美人茶</option>
+                  <option value="高山烏龍">阿里山清香高山烏龍</option>
+                  <option value="白毫普洱">熟茶陳年白毫普洱</option>
+                  <option value="舒壓花草茶">菩提薄荷舒壓草本茶</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-amber-200 mb-1">同行人數</label>
+                <input v-model.number="teaForm.guest_count" type="number" min="1" max="6" class="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white">
+              </div>
+            </div>
+            <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-950 font-bold rounded-xl shadow-md transition mt-2">
+              確認預約茶席
+            </button>
+          </form>
+        </div>
+
+        <!-- 心靈茶帖抽籤 -->
+        <div class="lg:col-span-6 bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-700">
+            <span class="text-xs font-bold uppercase text-amber-800 dark:text-amber-400">茶帖心靈籤語 (Dharma Tea Slips)</span>
+            <button @click="drawTeaSlip" class="text-xs font-bold text-amber-700 hover:text-amber-900 flex items-center space-x-1">
+              <i class="fas fa-random"></i><span>隨機抽取</span>
+            </button>
+          </div>
+
+          <div class="p-6 bg-amber-50 dark:bg-amber-950/40 rounded-2xl border border-amber-200 dark:border-amber-800 text-center space-y-3">
+            <div class="w-12 h-12 rounded-full bg-amber-500/20 text-amber-800 mx-auto flex items-center justify-center text-xl">
+              <i class="fas fa-leaf"></i>
+            </div>
+            <p class="font-serif text-base sm:text-lg font-bold text-slate-900 dark:text-white leading-relaxed italic">
+              {{ currentTeaSlip || '「茶禪一味，吃茶去！水沸聲中洗盡世塵，品一杯自性清香。」' }}
+            </p>
+            <span class="text-[10px] font-mono text-amber-700 uppercase tracking-widest block">— 星雲大師・茶禪思維 —</span>
+          </div>
+
+          <div class="space-y-1.5 pt-2 text-xs text-slate-600 dark:text-slate-300">
+            <div>• <strong>心存敬意：</strong>注水輕緩，如敬三寶。</div>
+            <div>• <strong>口吐香氣：</strong>品茗談吐，皆出愛語。</div>
+            <div>• <strong>行施方便：</strong>熱茶敬長，慈悲布施。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 【功能 82】青年共乘接駁與綠色減碳 (#carpool) -->
+    <section id="carpool" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200 dark:border-slate-800">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+        <div>
+          <div class="text-xs font-bold uppercase tracking-widest text-teal-600 mb-2">Eco Carpool & Green Commute</div>
+          <h3 class="text-3xl font-bold text-slate-900 dark:text-white">青年共乘接駁車隊・環保愛地球</h3>
+          <p class="text-slate-600 dark:text-slate-400 mt-2 text-xs sm:text-sm">落實環保與心保，串聯新竹高鐵站、火車站與竹科園區愛心共乘，累計綠色減碳量。</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div v-for="t in publicCarpoolList" :key="t.id" class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between space-y-3 hover:shadow-xl transition">
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-teal-50 text-teal-700 border border-teal-200">{{ t.status }}</span>
+              <span class="text-xs font-mono font-bold text-emerald-600">省碳 {{ t.carbon_saved_kg }} kg</span>
+            </div>
+            <div>
+              <div class="text-xs text-slate-400">起點：<strong class="text-slate-800 dark:text-white">{{ t.departure_location }}</strong></div>
+              <div class="text-xs text-slate-400 mt-0.5">終點：<strong class="text-emerald-700 dark:text-emerald-300">{{ t.destination }}</strong></div>
+            </div>
+            <div class="p-2.5 bg-slate-50 dark:bg-slate-900 rounded-xl flex items-center justify-between text-xs">
+              <span class="text-slate-500 font-mono"><i class="far fa-clock mr-1"></i>{{ t.departure_time }}</span>
+              <span class="font-bold text-slate-700 dark:text-slate-300">餘 {{ t.available_seats }} 席</span>
+            </div>
+            <div class="text-[11px] text-slate-400">車主：<strong class="text-slate-700 dark:text-slate-200">{{ t.driver_name }}</strong></div>
+          </div>
+          <button v-if="t.available_seats > 0" @click="bookCarpool(t.id)" class="w-full py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold transition">
+            預約搭乘此車次
+          </button>
+          <button v-else disabled class="w-full py-2 bg-slate-100 text-slate-400 rounded-xl text-xs font-bold cursor-not-allowed">
+            座位已滿
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 【功能 3】青年心願牆與物資認領池 (#wishlist) -->
+    <section id="wishlist" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200 dark:border-slate-800">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="text-xs font-bold uppercase tracking-widest text-rose-600 mb-2">Youth Wishlist & Mutual Aid</div>
+        <h3 class="text-3xl font-bold text-slate-900 dark:text-white">青年心願牆與活動物資認領池</h3>
+        <p class="text-slate-600 dark:text-slate-400 mt-2 text-xs sm:text-sm">青年許下學習願望、營隊物資需求，十方大眾隨喜結緣認領，成就有志青年的弘法夢想。</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div v-for="w in publicWishlist" :key="w.id" class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between space-y-3 hover:shadow-xl transition">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span :class="w.status === 'fulfilled' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold">
+                {{ w.status === 'fulfilled' ? '已圓滿認領' : '待認領發心' }}
+              </span>
+              <span class="text-xs text-slate-400">發願人：{{ w.wisher_name }}</span>
+            </div>
+            <h4 class="font-bold text-slate-900 dark:text-white text-base">{{ w.title }}</h4>
+            <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{{ w.description }}</p>
+          </div>
+          <div v-if="w.status !== 'fulfilled'" class="pt-2">
+            <button @click="sponsorWish(w.id)" class="w-full py-2 bg-gradient-to-r from-rose-500 to-amber-500 hover:from-rose-600 hover:to-amber-600 text-white rounded-xl text-xs font-bold transition shadow">
+              隨喜發心認領此願望
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 【功能 81】活動現場失物招領處 (#lostfound) -->
+    <section id="lostfound" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200 dark:border-slate-800">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-2">Lost & Found Service</div>
+        <h3 class="text-3xl font-bold text-slate-900 dark:text-white">活動現場失物招領與尋獲認領處</h3>
+        <p class="text-slate-600 dark:text-slate-400 mt-2 text-xs sm:text-sm">於法寶寺大殿、禪堂與營隊現場拾得之物品，提供失主即時線上查尋與認領手續。</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div v-for="lf in publicLostFound" :key="lf.id" class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-3">
+          <div class="flex items-center justify-between">
+            <span :class="lf.status === 'claimed' ? 'bg-emerald-100 text-emerald-800' : 'bg-orange-100 text-orange-800'" class="px-2.5 py-0.5 rounded-full font-bold text-[10px]">
+              {{ lf.status === 'claimed' ? '已認領領回' : '等待失主認領' }}
+            </span>
+            <span class="text-xs text-slate-400 font-mono">{{ lf.found_date }}</span>
+          </div>
+          <h4 class="font-bold text-slate-900 dark:text-white text-sm">{{ lf.item_name }}</h4>
+          <div class="text-xs text-slate-500"><strong>拾得地點：</strong>{{ lf.found_location }}</div>
+          <p class="text-xs text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-100 dark:border-slate-700">
+            {{ lf.notes }}
+          </p>
+          <button v-if="lf.status !== 'claimed'" @click="claimLostItem(lf.id)" class="w-full py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold transition">
+            我是失主・登記領回
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 【功能 72】隨喜功德箱線上徵信芳名錄 (#donations) -->
+    <section id="donations" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200 dark:border-slate-800">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="text-xs font-bold uppercase tracking-widest text-amber-600 mb-2">Merit Transparency & Honor Roll</div>
+        <h3 class="text-3xl font-bold text-slate-900 dark:text-white">隨喜功德箱線上徵信芳名錄</h3>
+        <p class="text-slate-600 dark:text-slate-400 mt-2 text-xs sm:text-sm">感謝十方善信與青年同道護持青年弘法基金、助印經典，徵信公開透明，福德無量。</p>
+      </div>
+
+      <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-b uppercase font-bold">
+              <tr>
+                <th class="p-4">收據字號</th>
+                <th class="p-4">功德主姓名</th>
+                <th class="p-4">護持項目</th>
+                <th class="p-4">隨喜金額</th>
+                <th class="p-4">回向祈願文疏</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+              <tr v-for="d in publicDonations" :key="d.id" class="hover:bg-slate-50 dark:hover:bg-slate-900/50">
+                <td class="p-4 font-mono font-bold text-slate-600">{{ d.receipt_no }}</td>
+                <td class="p-4 font-black text-slate-900 dark:text-white">{{ d.donor_name }}</td>
+                <td class="p-4"><span class="px-2 py-0.5 rounded bg-amber-50 text-amber-800 font-bold text-[10px]">{{ d.donation_type }}</span></td>
+                <td class="p-4 font-mono font-black text-rose-600 text-sm">NT$ {{ d.amount?.toLocaleString() }}</td>
+                <td class="p-4 text-slate-500 italic max-w-xs truncate">“{{ d.dedication_notes || '-' }}”</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 【功能 53】活動常見問題 FAQ 摺疊式知識庫 (#faq) -->
+    <section id="faq" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200 dark:border-slate-800">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="text-xs font-bold uppercase tracking-widest text-blue-600 mb-2">Knowledge Base & FAQs</div>
+        <h3 class="text-3xl font-bold text-slate-900 dark:text-white">活動常見問題 FAQ 知識庫</h3>
+        <p class="text-slate-600 dark:text-slate-400 mt-2 text-xs sm:text-sm">彙整青年入團、志工服務、公文時數認證與道場共修生活之常見問答。</p>
+      </div>
+
+      <div class="max-w-3xl mx-auto space-y-3">
+        <div v-for="f in publicFaqList" :key="f.id" class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+          <button @click="toggleFaq(f.id)" class="w-full p-4 text-left flex items-center justify-between space-x-3">
+            <span class="font-bold text-slate-800 dark:text-white text-sm">{{ f.question }}</span>
+            <i :class="activeFaqId === f.id ? 'fas fa-chevron-up text-amber-600' : 'fas fa-chevron-down text-slate-400'" class="text-xs shrink-0"></i>
+          </button>
+          <div v-if="activeFaqId === f.id" class="px-4 pb-4 pt-1 text-xs text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-700">
+            {{ f.answer }}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 【功能 42】青年特約友好商家指南 (#partners) -->
+    <section id="partners" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200 dark:border-slate-800">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-2">Local Community Partners</div>
+        <h3 class="text-3xl font-bold text-slate-900 dark:text-white">新竹與竹北青年特約友好商家指南</h3>
+        <p class="text-slate-600 dark:text-slate-400 mt-2 text-xs sm:text-sm">串聯在地蔬食料理、獨立書店與藝文咖啡，持佛光青年證享專屬結緣優惠。</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div v-for="st in publicPartners" :key="st.id" class="bg-white dark:bg-slate-800 rounded-3xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between space-y-3 hover:shadow-xl transition">
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs px-2.5 py-0.5 rounded-full font-bold bg-emerald-100 text-emerald-800">{{ st.category }}</span>
+              <span class="text-[10px] text-slate-400">特約結緣</span>
+            </div>
+            <h4 class="text-base font-bold text-slate-900 dark:text-white leading-snug">{{ st.name }}</h4>
+            <p class="text-xs text-amber-800 dark:text-amber-200 bg-amber-50 dark:bg-amber-950/40 p-2.5 rounded-xl font-bold border border-amber-200 dark:border-amber-800">
+              🎁 {{ st.perk }}
+            </p>
+            <p class="text-xs text-slate-500 flex items-start space-x-1">
+              <i class="fas fa-map-marker-alt text-slate-400 mt-0.5 shrink-0"></i>
+              <span>{{ st.address }}</span>
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between text-xs">
+            <span class="text-slate-400"><i class="fas fa-phone mr-1"></i>{{ st.contact || '無' }}</span>
+            <a :href="'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(st.name + ' ' + st.address)" target="_blank" class="px-2.5 py-1 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg font-bold">
+              導航
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 幹部團隊名冊專區 (#team) -->
+    <section id="team" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-slate-200 dark:border-slate-800">
+      <div class="text-center max-w-2xl mx-auto mb-10">
+        <div class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-2">Cadre Leadership & Heritage</div>
+        <h3 class="text-3xl font-bold text-slate-900 dark:text-white">幹部團隊名冊與任期傳承</h3>
+        <p class="text-slate-600 dark:text-slate-400 mt-2 text-xs sm:text-sm">集體創作、制度領導、傳承願力，服務新竹在地青年。</p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div v-for="m in teamList" :key="m.id" class="bg-white dark:bg-slate-800 rounded-3xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between items-center text-center space-y-3">
+          <img :src="m.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=300&q=80'" class="w-20 h-20 rounded-full object-cover border-2 border-amber-300">
+          <div>
+            <span class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">{{ m.position }}</span>
+            <h4 class="text-base font-bold text-slate-900 dark:text-white mt-1">{{ m.name }}</h4>
+            <p class="text-xs text-slate-500 mt-2 italic leading-relaxed">“{{ m.bio }}”</p>
+          </div>
+          <div class="w-full pt-3 border-t border-slate-100 dark:border-slate-700 text-[11px] text-slate-400">
+            {{ m.term || '第十二屆' }} ｜ 聯絡: {{ m.contact || '無' }}
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 頁腳 Footer -->
+    <footer class="bg-slate-900 text-white pt-16 pb-8 border-t border-slate-800 mt-auto">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-12 border-b border-slate-800">
+          <div class="md:col-span-2 space-y-4">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white text-xl">
+                <i class="fas fa-dharmachakra"></i>
+              </div>
+              <span class="text-lg font-bold">{{ blocks.site_title || '國際佛光會新竹青年分團' }}</span>
+            </div>
+            <p class="text-slate-400 text-xs sm:text-sm leading-relaxed max-w-md">
+              以文化弘揚佛法，以教育培養人才，以慈善福利社會，以共修淨化人心。歡迎有志青年加入我們的行列！
+            </p>
+            <div class="text-xs text-amber-400 font-bold">
+              《新竹佛光青年X竹光三參》專屬新竹青年的生活思辨與心靈加油站
+            </div>
+          </div>
+
+          <div class="space-y-2 text-xs sm:text-sm">
+            <h5 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-2">道場據點與聯絡</h5>
+            <p class="text-slate-300"><i class="fas fa-synagogue mr-2 text-amber-400"></i>{{ blocks.contact_temple || '佛光山新竹法寶寺' }}</p>
+            <p class="text-slate-300"><i class="fas fa-map-marker-alt mr-2 text-amber-400"></i>{{ blocks.contact_address || '新竹市東區民族路 241 巷 1 號' }}</p>
+            <p class="text-slate-300"><i class="fas fa-phone mr-2 text-amber-400"></i>{{ blocks.contact_phone || '03-5325566' }}</p>
+            <p class="text-slate-300"><i class="fas fa-envelope mr-2 text-amber-400"></i>{{ blocks.contact_email || 'hsinchu.blia.youth@gmail.com' }}</p>
+          </div>
+
+          <div class="space-y-2 text-xs sm:text-sm">
+            <h5 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-2">系統與管理入口</h5>
+            <ul class="space-y-2 text-slate-400">
+              <li><a href="/admin" class="hover:text-amber-300 transition"><i class="fas fa-shield-alt mr-1"></i>後台 CMS 管理系統</a></li>
+              <li><a href="/eval" target="_blank" class="hover:text-amber-300 transition"><i class="fas fa-id-badge mr-1"></i>評審免登入通道</a></li>
+              <li><a href="/docs" target="_blank" class="hover:text-amber-300 transition"><i class="fas fa-code mr-1"></i>FastAPI 官方 Swagger 文件</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="mt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500">
+          <p>{{ blocks.footer_copyright || '© 2026 國際佛光會中華青年總會 新竹青年分團 版權所有' }}</p>
+          <p class="mt-2 sm:mt-0">本地高效 SQLite + FastAPI 系統架構・100 項數位弘法功能大滿貫</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- 各項公共互動 Modals -->
+
+    <!-- 【功能 96】佛光每日福慧籤卡 Modal -->
+    <div v-if="showWisdomModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" @click.self="showWisdomModal = false">
+      <div class="bg-amber-50 rounded-3xl max-w-lg w-full border border-amber-300 shadow-2xl p-6 relative">
+        <button @click="showWisdomModal = false" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+        <div class="flex items-center space-x-2 text-amber-900 font-bold mb-3">
+          <i class="fas fa-magic text-amber-600 text-lg"></i>
+          <h3 class="text-base">星雲大師每日福慧法語籤卡 (功能 96)</h3>
+        </div>
+        <p class="text-xs text-slate-600 mb-4">抽一籤大師智慧，指引今日工作與生活方向。</p>
+        <div class="border border-amber-200 rounded-2xl bg-white p-2 shadow-inner max-h-[500px] overflow-hidden flex justify-center">
+          <div v-html="currentWisdomSvg" class="w-full flex justify-center"></div>
+        </div>
+        <div class="mt-4 flex justify-end">
+          <button @click="fetchRandomWisdomCard" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1">
+            <i class="fas fa-sync-alt"></i><span>重抽一籤</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 【功能 100】百項大滿貫白皮書 Modal -->
+    <div v-if="showCentenaryModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" @click.self="showCentenaryModal = false">
+      <div class="bg-white rounded-3xl max-w-3xl w-full border border-slate-100 shadow-2xl p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+        <button @click="showCentenaryModal = false" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+        <div class="text-center pb-6 border-b border-slate-100">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-100 text-amber-900 text-xs font-bold mb-2">
+            <span>🏆</span> 慶祝新竹佛光青年分團 CMS 達成 100 項功能大滿貫
+          </div>
+          <h3 class="text-2xl font-black text-slate-900">100 項數位弘法創新成效白皮書</h3>
+          <p class="text-xs text-slate-500 mt-1">傳承人間佛教理念，歷經二十輪敏捷研發，建構完全動態化之全端系統</p>
+        </div>
+
+        <div v-if="centenaryPanorama.metrics_summary" class="grid grid-cols-2 sm:grid-cols-4 gap-3 my-6">
+          <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-center">
+            <div class="text-[11px] text-amber-700 font-bold">系統總功能</div>
+            <div class="text-2xl font-black text-amber-950 mt-0.5">{{ centenaryPanorama.metrics_summary.total_system_features }} 項</div>
+            <div class="text-[10px] text-emerald-600 font-bold">100% 達成</div>
+          </div>
+          <div class="p-3 bg-blue-50 rounded-xl border border-blue-200 text-center">
+            <div class="text-[11px] text-blue-700 font-bold">志工服務時數</div>
+            <div class="text-2xl font-black text-blue-950 mt-0.5">{{ centenaryPanorama.metrics_summary.total_volunteer_hours }} hr</div>
+            <div class="text-[10px] text-blue-600 font-bold">存摺認證</div>
+          </div>
+          <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 text-center">
+            <div class="text-[11px] text-emerald-700 font-bold">行善微日記</div>
+            <div class="text-2xl font-black text-emerald-950 mt-0.5">{{ centenaryPanorama.metrics_summary.total_good_deeds_logged }} 篇</div>
+            <div class="text-[10px] text-emerald-600 font-bold">三好實踐</div>
+          </div>
+          <div class="p-3 bg-orange-50 rounded-xl border border-orange-200 text-center">
+            <div class="text-[11px] text-orange-700 font-bold">綠色減碳量</div>
+            <div class="text-2xl font-black text-orange-950 mt-0.5">{{ centenaryPanorama.metrics_summary.total_green_carbon_saved_kg }} kg</div>
+            <div class="text-[10px] text-orange-600 font-bold">共乘蔬食</div>
+          </div>
+        </div>
+
+        <div v-if="centenaryWhitepaper && centenaryWhitepaper.chapters" class="space-y-3">
+          <div v-for="ch in centenaryWhitepaper.chapters" :key="ch.chapter_no" class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+            <h4 class="font-bold text-amber-900 text-sm mb-1">{{ ch.title }}</h4>
+            <p class="text-xs text-slate-600 leading-relaxed">{{ ch.content }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 【功能 95】行事曆即時同步 Modal -->
+    <div v-if="showCalendarSyncModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" @click.self="showCalendarSyncModal = false">
+      <div class="bg-white rounded-3xl max-w-lg w-full border border-slate-100 shadow-2xl p-6 relative">
+        <button @click="showCalendarSyncModal = false" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+        <div class="flex items-center space-x-2 text-indigo-700 font-bold mb-3">
+          <i class="fas fa-calendar-alt text-xl"></i>
+          <h3 class="text-base">佛光青年年度行事曆即時同步 (WebCal)</h3>
+        </div>
+        <p class="text-xs text-slate-600 mb-4 leading-relaxed">
+          透過 RFC 5545 國際標準 WebCal 訂閱流，將青年分團活動、共修、營隊日程自動同步到您的手機行事曆。
+        </p>
+        <div class="space-y-3 text-xs mb-6">
+          <div class="p-3 rounded-xl bg-slate-50 border">
+            <span class="font-bold text-slate-700 block mb-1">🔗 WebCal 即時訂閱網址：</span>
+            <input readonly :value="calendarSyncData.webcal_url || 'webcal://localhost:8000/api/evidence/calendar/webcal-feed'" class="w-full bg-white border rounded p-1.5 font-mono text-[11px] select-all">
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <a :href="calendarSyncData.webcal_url || '/api/evidence/calendar/webcal-feed'" class="flex-1 text-center py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold transition">
+            一鍵加入手機日曆
+          </a>
+          <a href="/api/evidence/calendar.ics" download class="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+            下載 .ICS
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 佐證詳細 Modal -->
+    <div v-if="selectedEvidence" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" @click.self="selectedEvidence = null">
+      <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl p-6">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <span :class="getCategoryBadgeClass(selectedEvidence.category)" class="text-xs px-2.5 py-1 rounded-full font-bold">
+            {{ getCategoryName(selectedEvidence.category) }}
+          </span>
+          <button @click="selectedEvidence = null" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 mt-3">{{ selectedEvidence.title }}</h3>
+        <div class="text-xs text-slate-500 my-2">
+          <i class="far fa-calendar-alt mr-1"></i>{{ selectedEvidence.event_date }} ｜ <i class="fas fa-map-marker-alt mr-1"></i>{{ selectedEvidence.location }}
+        </div>
+        <div class="p-4 bg-slate-50 rounded-2xl border text-xs leading-relaxed my-3">
+          {{ selectedEvidence.summary }}
+        </div>
+        <div class="pt-3 border-t flex justify-between items-center text-xs">
+          <a :href="'/api/evidence/' + selectedEvidence.id + '/export-pdf'" target="_blank" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow">
+            下載 A4 評鑑提報單 (PDF)
+          </a>
+          <button @click="selectedEvidence = null" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-bold">
+            關閉
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        const blocks = ref({});
+        const evidenceList = ref([]);
+        const radarStats = ref({});
+        const countdownEvents = ref([]);
+        const marqueeList = ref([]);
+        const activeMarqueeIdx = ref(0);
+        const activeMarquee = computed(() => marqueeList.value[activeMarqueeIdx.value] || null);
+
+        const publicPodcasts = ref([]);
+        const publicRecipes = ref([]);
+        const recipeStats = ref({});
+        const publicCarpoolList = ref([]);
+        const publicWishlist = ref([]);
+        const publicLostFound = ref([]);
+        const publicDonations = ref([]);
+        const publicFaqList = ref([]);
+        const publicPartners = ref([]);
+        const teamList = ref([]);
+        const healthStats = ref({});
+        const currentCategory = ref('');
+        const searchKeyword = ref('');
+        const selectedEvidence = ref(null);
+        const currentUser = ref(null);
+
+        // 生活禪狀態
+        const zenTimer = ref({ presetMinutes: 10, remainingSeconds: 600, isRunning: false, timerId: null });
+        const zenStats = ref({});
+        const showZenModal = ref(false);
+
+        // 生活茶席
+        const teaForm = ref({ guest_name: '', booking_date: new Date().toISOString().slice(0, 10), tea_time: '14:00 - 15:30', tea_variety: '東方美人茶', guest_count: 2 });
+        const currentTeaSlip = ref('');
+
+        // FAQ 展開
+        const activeFaqId = ref(null);
+
+        // Modals
+        const showWisdomModal = ref(false);
+        const currentWisdomSvg = ref('');
+        const showCentenaryModal = ref(false);
+        const centenaryPanorama = ref({});
+        const centenaryWhitepaper = ref({});
+        const showCalendarSyncModal = ref(false);
+        const calendarSyncData = ref({});
+        const showHealthModal = ref(false);
+
+        // 主題
+        const isDarkMode = ref(localStorage.getItem('blia_theme') === 'dark');
+        const isAccessibleMode = ref(localStorage.getItem('blia_accessible') === 'true');
+
+        const toggleDarkMode = () => {
+          isDarkMode.value = !isDarkMode.value;
+          localStorage.setItem('blia_theme', isDarkMode.value ? 'dark' : 'light');
+          document.documentElement.classList.toggle('dark', isDarkMode.value);
+        };
+
+        const toggleAccessibleMode = () => {
+          isAccessibleMode.value = !isAccessibleMode.value;
+          localStorage.setItem('blia_accessible', isAccessibleMode.value ? 'true' : 'false');
+          document.documentElement.classList.toggle('accessible-mode', isAccessibleMode.value);
+        };
+
+        const nextMarquee = () => {
+          if (marqueeList.value.length > 0) {
+            activeMarqueeIdx.value = (activeMarqueeIdx.value + 1) % marqueeList.value.length;
+          }
+        };
+
+        const toggleFaq = (id) => {
+          activeFaqId.value = activeFaqId.value === id ? null : id;
+        };
+
+        const speakText = (text) => {
+          if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = 'zh-TW';
+            window.speechSynthesis.speak(u);
+          } else {
+            alert(text);
+          }
+        };
+
+        // 資料抓取函式
+        const loadAllPublicData = async () => {
+          try {
+            const [bRes, evRes, rdrRes, cdRes, ancRes, podRes, recRes, recStRes, cpRes, wishRes, lfRes, donRes, faqRes, ptRes, tmRes, hlRes, zstRes] = await Promise.all([
+              fetch('/api/blocks/dict'),
+              fetch('/api/evidence'),
+              fetch('/api/evidence/radar-stats'),
+              fetch('/api/countdown/active'),
+              fetch('/api/announcements/active'),
+              fetch('/api/podcasts'),
+              fetch('/api/vegetarian-recipes'),
+              fetch('/api/vegetarian-recipes/stats'),
+              fetch('/api/carpool'),
+              fetch('/api/wishlist'),
+              fetch('/api/lost-found'),
+              fetch('/api/donations'),
+              fetch('/api/faq'),
+              fetch('/api/partners'),
+              fetch('/api/team'),
+              fetch('/api/health/stats'),
+              fetch('/api/health/zen-stats')
+            ]);
+
+            if (bRes.ok) blocks.value = await bRes.json();
+            if (evRes.ok) evidenceList.value = await evRes.json();
+            if (rdrRes.ok) radarStats.value = await rdrRes.json();
+            if (cdRes.ok) countdownEvents.value = (await cdRes.json()).events || [];
+            if (ancRes.ok) {
+              const d = await ancRes.json();
+              marqueeList.value = d.marquee || [];
+            }
+            if (podRes.ok) publicPodcasts.value = await podRes.json();
+            if (recRes.ok) publicRecipes.value = await recRes.json();
+            if (recStRes.ok) recipeStats.value = await recStRes.json();
+            if (cpRes.ok) publicCarpoolList.value = await cpRes.json();
+            if (wishRes.ok) publicWishlist.value = await wishRes.json();
+            if (lfRes.ok) publicLostFound.value = await lfRes.json();
+            if (donRes.ok) publicDonations.value = await donRes.json();
+            if (faqRes.ok) publicFaqList.value = await faqRes.json();
+            if (ptRes.ok) publicPartners.value = await ptRes.json();
+            if (tmRes.ok) teamList.value = await tmRes.json();
+            if (hlRes.ok) healthStats.value = await hlRes.json();
+            if (zstRes.ok) zenStats.value = await zstRes.json();
+          } catch (e) {
+            console.error('Data load error:', e);
+          }
+        };
+
+        const drawTeaSlip = async () => {
+          try {
+            const res = await fetch('/api/tea-ceremony/slips');
+            if (res.ok) {
+              const d = await res.json();
+              currentTeaSlip.value = d.tea_slip;
+            }
+          } catch (e) {}
+        };
+
+        const submitTeaBooking = async () => {
+          try {
+            const res = await fetch('/api/tea-ceremony/bookings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(teaForm.value)
+            });
+            if (res.ok) {
+              const d = await res.json();
+              alert('🍵 茶席預約成功！\n今日茶帖：' + d.tea_slip_quote);
+              currentTeaSlip.value = d.tea_slip_quote;
+            }
+          } catch (e) {
+            alert('預約失敗');
+          }
+        };
+
+        const bookCarpool = async (id) => {
+          try {
+            const res = await fetch('/api/carpool/' + id + '/book', { method: 'PUT' });
+            if (res.ok) {
+              alert('🎉 共乘座位預約成功！');
+              const r = await fetch('/api/carpool');
+              if (r.ok) publicCarpoolList.value = await r.json();
+            } else {
+              alert('座位已滿');
+            }
+          } catch (e) { alert('預約失敗'); }
+        };
+
+        const sponsorWish = (id) => {
+          alert('💖 感謝您的慈悲發心！請洽法寶寺青年分團知客處或加入分團 LINE 登記認領！');
+        };
+
+        const claimLostItem = (id) => {
+          const name = prompt('請輸入您的真實姓名以供核對領取：', '李同學');
+          if (name) {
+            alert('✅ 認領登記已送出！請於本週六前往法寶寺 2F 青年團部出示證件領取。');
+          }
+        };
+
+        // 生活禪計時器
+        const setZenPreset = (mins) => {
+          zenTimer.value.presetMinutes = mins;
+          zenTimer.value.remainingSeconds = mins * 60;
+        };
+
+        const startZenTimer = () => {
+          if (zenTimer.value.isRunning) return;
+          zenTimer.value.isRunning = true;
+          zenTimer.value.timerId = setInterval(() => {
+            if (zenTimer.value.remainingSeconds > 0) {
+              zenTimer.value.remainingSeconds--;
+            } else {
+              clearInterval(zenTimer.value.timerId);
+              zenTimer.value.isRunning = false;
+              alert('🔔 靜心時間圓滿！身心自在，法喜充滿！');
+            }
+          }, 1000);
+        };
+
+        const pauseZenTimer = () => {
+          zenTimer.value.isRunning = false;
+          clearInterval(zenTimer.value.timerId);
+        };
+
+        const resetZenTimer = () => {
+          pauseZenTimer();
+          zenTimer.value.remainingSeconds = zenTimer.value.presetMinutes * 60;
+        };
+
+        const openWisdomModal = async () => {
+          showWisdomModal.value = true;
+          await fetchRandomWisdomCard();
+        };
+
+        const fetchRandomWisdomCard = async () => {
+          try {
+            const res = await fetch('/api/wisdom-cards/random');
+            if (res.ok) {
+              const d = await res.json();
+              currentWisdomSvg.value = d.svg_markup;
+            }
+          } catch (e) {}
+        };
+
+        const openCentenaryModal = async () => {
+          showCentenaryModal.value = true;
+          try {
+            const [pRes, wRes] = await Promise.all([
+              fetch('/api/centenary/panorama-dashboard'),
+              fetch('/api/centenary/whitepaper')
+            ]);
+            if (pRes.ok) centenaryPanorama.value = await pRes.json();
+            if (wRes.ok) centenaryWhitepaper.value = (await wRes.json()).whitepaper;
+          } catch (e) {}
+        };
+
+        const openCalendarSyncModal = async () => {
+          showCalendarSyncModal.value = true;
+          try {
+            const res = await fetch('/api/evidence/calendar/sync-guide');
+            if (res.ok) calendarSyncData.value = await res.json();
+          } catch (e) {}
+        };
+
+        const openEvidenceModal = (item) => {
+          selectedEvidence.value = item;
+        };
+
+        const filteredByYearEvidence = computed(() => evidenceList.value);
+
+        const filteredEvidence = computed(() => {
+          return evidenceList.value.filter(item => {
+            const matchCat = !currentCategory.value || item.category === currentCategory.value;
+            const kw = searchKeyword.value.toLowerCase().trim();
+            const matchKw = !kw || 
+              item.title.toLowerCase().includes(kw) ||
+              item.summary.toLowerCase().includes(kw) ||
+              (item.evaluation_code && item.evaluation_code.toLowerCase().includes(kw));
+            return matchCat && matchKw;
+          });
+        });
+
+        const getCategoryName = (cat) => {
+          const map = { culture: '文化弘法', education: '教育培力', cultivation: '共修淨心', charity: '慈善福田' };
+          return map[cat] || cat;
+        };
+
+        const getCategoryBadgeClass = (cat) => {
+          const map = {
+            culture: 'bg-amber-100 text-amber-800 border border-amber-300',
+            education: 'bg-blue-100 text-blue-800 border border-blue-300',
+            cultivation: 'bg-emerald-100 text-emerald-800 border border-emerald-300',
+            charity: 'bg-rose-100 text-rose-800 border border-rose-300'
+          };
+          return map[cat] || 'bg-slate-100 text-slate-800';
+        };
+
+        onMounted(() => {
+          if (isDarkMode.value) document.documentElement.classList.add('dark');
+          if (isAccessibleMode.value) document.documentElement.classList.add('accessible-mode');
+          loadAllPublicData();
+          setInterval(nextMarquee, 5000);
+        });
+
+        return {
+          blocks,
+          evidenceList,
+          radarStats,
+          countdownEvents,
+          marqueeList,
+          activeMarqueeIdx,
+          activeMarquee,
+          publicPodcasts,
+          publicRecipes,
+          recipeStats,
+          publicCarpoolList,
+          publicWishlist,
+          publicLostFound,
+          publicDonations,
+          publicFaqList,
+          publicPartners,
+          teamList,
+          healthStats,
+          currentCategory,
+          searchKeyword,
+          filteredByYearEvidence,
+          filteredEvidence,
+          selectedEvidence,
+          currentUser,
+          zenTimer,
+          zenStats,
+          showZenModal,
+          teaForm,
+          currentTeaSlip,
+          activeFaqId,
+          showWisdomModal,
+          currentWisdomSvg,
+          showCentenaryModal,
+          centenaryPanorama,
+          centenaryWhitepaper,
+          showCalendarSyncModal,
+          calendarSyncData,
+          showHealthModal,
+          isDarkMode,
+          isAccessibleMode,
+          toggleDarkMode,
+          toggleAccessibleMode,
+          nextMarquee,
+          toggleFaq,
+          speakText,
+          drawTeaSlip,
+          submitTeaBooking,
+          bookCarpool,
+          sponsorWish,
+          claimLostItem,
+          setZenPreset,
+          startZenTimer,
+          pauseZenTimer,
+          resetZenTimer,
+          openWisdomModal,
+          fetchRandomWisdomCard,
+          openCentenaryModal,
+          openCalendarSyncModal,
+          openEvidenceModal,
+          getCategoryName,
+          getCategoryBadgeClass
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

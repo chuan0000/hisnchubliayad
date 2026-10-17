@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>國際佛光會新竹青年分團 - 評鑑委員專屬審閱通道</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>[v-cloak] { display: none; }</style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased font-sans min-h-screen flex flex-col">
+  <div id="app" v-cloak class="flex-grow flex flex-col">
+
+    <!-- 頂部 VIP 導航列 -->
+    <header class="bg-slate-900 text-white sticky top-0 z-40 shadow-md border-b border-amber-500/30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center text-white text-2xl shadow-md">
+            <i class="fas fa-award"></i>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h1 class="text-lg font-bold text-white tracking-wide">新竹佛光青年分團</h1>
+              <span class="text-xs px-2.5 py-0.5 rounded-full bg-amber-400/20 text-amber-300 font-bold border border-amber-400/30">評鑑審閱通道</span>
+            </div>
+            <p class="text-xs text-slate-400">尊貴的 {{ reviewerName || '評鑑委員' }}，歡迎指導審閱！</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <a :href="'/api/evidence/export-zip?year=' + selectedYear" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow transition flex items-center space-x-1.5">
+            <i class="fas fa-file-archive"></i>
+            <span>下載評鑑完整 ZIP 資料包</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <!-- Token 驗證失敗警告 -->
+    <div v-if="tokenError" class="max-w-xl mx-auto my-16 p-8 bg-white rounded-3xl shadow-xl text-center space-y-4 border border-rose-200">
+      <div class="w-16 h-16 rounded-full bg-rose-100 text-rose-600 mx-auto flex items-center justify-center text-3xl">
+        <i class="fas fa-lock"></i>
+      </div>
+      <h2 class="text-xl font-bold text-slate-900">審閱通行證無效或已過期</h2>
+      <p class="text-xs text-slate-500 leading-relaxed">{{ tokenError }}</p>
+      <div class="pt-2">
+        <a href="/" class="px-5 py-2.5 bg-slate-800 text-white rounded-xl text-xs font-bold inline-block">返回前台首頁</a>
+      </div>
+    </div>
+
+    <!-- 評鑑內容主體 -->
+    <main v-else class="max-w-7xl mx-auto px-4 sm:px-6 py-10 flex-grow space-y-10">
+
+      <!-- 【功能 6】四大宗旨五育均衡佔比看板 -->
+      <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-slate-200 space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 gap-4">
+          <div>
+            <span class="text-xs font-bold text-amber-600 uppercase tracking-widest">Balance of Four Great Objectives</span>
+            <h3 class="text-2xl font-bold text-slate-900 mt-1">四大宗旨五育均衡實踐指標</h3>
+          </div>
+          <div class="flex items-center space-x-3">
+            <div class="px-4 py-2 bg-amber-50 border border-amber-200 rounded-xl text-center">
+              <div class="text-[10px] text-amber-800 font-bold uppercase">三好實踐指數</div>
+              <div class="text-xl font-black text-amber-900">{{ radarStats.balance_index || 95 }} 分</div>
+            </div>
+            <div class="px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
+              <div class="text-[10px] text-emerald-800 font-bold uppercase">評鑑自我評等</div>
+              <div class="text-xl font-black text-emerald-800">{{ radarStats.evaluation_grade || '特優 (S)' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 四大維度進度比例條 -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div v-for="cat in radarStats.radar_data" :key="cat.category" class="p-4 rounded-2xl border border-slate-200 bg-slate-50/50 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-800 text-sm">{{ cat.name }}</span>
+              <span class="text-xs font-black" :style="{ color: cat.color }">{{ cat.percentage }}%</span>
+            </div>
+            <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-700" :style="{ width: cat.percentage + '%', backgroundColor: cat.color }"></div>
+            </div>
+            <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
+              <span>{{ cat.events_count }} 場專案活動</span>
+              <span>受惠 {{ cat.participants.toLocaleString() }} 人次</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 成果篩選與列表 -->
+      <div class="space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <!-- 年度切換 -->
+          <div class="flex items-center space-x-2">
+            <span class="text-xs font-bold text-slate-500"><i class="far fa-calendar-alt mr-1"></i>審閱年度：</span>
+            <select v-model="selectedYear" @change="loadItems" class="px-3.5 py-1.5 bg-white border border-slate-300 rounded-xl text-xs font-bold">
+              <option value="">全部年度成果</option>
+              <option value="2026">2026 年度</option>
+              <option value="2025">2025 年度 (歷史)</option>
+            </select>
+          </div>
+
+          <!-- 分類 Tabs -->
+          <div class="flex flex-wrap items-center gap-1.5 bg-slate-200/60 p-1.5 rounded-xl text-xs font-semibold">
+            <button @click="selectedCategory = ''" :class="selectedCategory === '' ? 'bg-white text-slate-900 shadow' : 'text-slate-600'" class="px-3 py-1.5 rounded-lg transition">全部</button>
+            <button @click="selectedCategory = 'culture'" :class="selectedCategory === 'culture' ? 'bg-amber-500 text-white shadow' : 'text-slate-600'" class="px-3 py-1.5 rounded-lg transition">文化</button>
+            <button @click="selectedCategory = 'education'" :class="selectedCategory === 'education' ? 'bg-blue-600 text-white shadow' : 'text-slate-600'" class="px-3 py-1.5 rounded-lg transition">教育</button>
+            <button @click="selectedCategory = 'cultivation'" :class="selectedCategory === 'cultivation' ? 'bg-emerald-600 text-white shadow' : 'text-slate-600'" class="px-3 py-1.5 rounded-lg transition">共修</button>
+            <button @click="selectedCategory = 'charity'" :class="selectedCategory === 'charity' ? 'bg-rose-600 text-white shadow' : 'text-slate-600'" class="px-3 py-1.5 rounded-lg transition">慈善</button>
+          </div>
+        </div>
+
+        <!-- 成果卡片列表 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div v-for="item in filteredItems" :key="item.id" class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-lg transition">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span :class="getBadgeClass(item.category)" class="text-xs px-2.5 py-1 rounded-full font-bold">
+                  {{ getCatName(item.category) }}
+                </span>
+                <span v-if="item.evaluation_code" class="text-xs px-2 py-0.5 rounded font-mono font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                  {{ item.evaluation_code }}
+                </span>
+              </div>
+
+              <h4 class="text-base font-bold text-slate-900 leading-snug">{{ item.title }}</h4>
+              <p class="text-xs text-slate-500"><i class="far fa-calendar mr-1"></i>{{ item.event_date }} ｜ {{ item.location }}</p>
+              
+              <p class="text-xs text-slate-600 leading-relaxed line-clamp-3 bg-slate-50 p-3 rounded-xl border border-slate-100">
+                {{ item.summary }}
+              </p>
+
+              <!-- 【功能 8】預期目標 vs 實際成效對照卡 -->
+              <div v-if="item.expected_goals || item.actual_highlights" class="p-3 bg-amber-50/60 rounded-xl border border-amber-200 text-xs space-y-1">
+                <div v-if="item.expected_goals" class="text-slate-600">
+                  <span class="font-bold text-amber-900">預期目標：</span>{{ item.expected_goals }}
+                </div>
+                <div v-if="item.actual_highlights" class="text-slate-700">
+                  <span class="font-bold text-emerald-800">實際亮點：</span>{{ item.actual_highlights }}
+                </div>
+              </div>
+
+              <!-- 量化數據 -->
+              <div class="flex items-center space-x-3 text-[11px] text-slate-600 pt-1">
+                <span>參與：<strong>{{ item.participants_count || 0 }}</strong> 人次</span>
+                <span>滿意度：<strong>{{ item.satisfaction_rate || 95 }}%</strong></span>
+              </div>
+            </div>
+
+            <!-- 操作列：檢視佐證公文 + 線上評分評語 -->
+            <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between">
+              <a v-if="item.file_url" :href="item.file_url" target="_blank" class="text-xs text-amber-600 hover:underline font-bold flex items-center space-x-1">
+                <i :class="item.file_type === 'pdf' ? 'fas fa-file-pdf text-red-500' : 'fas fa-image text-emerald-500'"></i>
+                <span>查閱主要佐證檔</span>
+              </a>
+              <button @click="openFeedbackModal(item)" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition flex items-center space-x-1">
+                <i class="fas fa-star text-amber-400"></i>
+                <span>線上評語/給分</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- 【功能 10】線上評分評語 Modal -->
+    <div v-if="showFeedbackModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click.self="showFeedbackModal = false">
+      <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl p-6 space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <h3 class="text-base font-bold text-slate-900 flex items-center space-x-2">
+            <i class="fas fa-award text-amber-500"></i>
+            <span>評審指導評語與評等</span>
+          </h3>
+          <button @click="showFeedbackModal = false" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        </div>
+
+        <div>
+          <div class="text-xs font-bold text-slate-800 truncate">{{ activeItem.title }}</div>
+          <div class="text-[11px] text-slate-400 mt-0.5">指標代碼：{{ activeItem.evaluation_code || '一般成果' }}</div>
+        </div>
+
+        <!-- 星級評分選擇 -->
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">評核星等 (1 ~ 5 星)</label>
+          <div class="flex items-center space-x-2">
+            <button v-for="star in 5" :key="star" type="button" @click="feedbackForm.rating = star" class="text-2xl transition" :class="star <= feedbackForm.rating ? 'text-amber-400' : 'text-slate-300'">
+              <i class="fas fa-star"></i>
+            </button>
+            <span class="text-xs font-bold text-slate-700 ml-2">{{ feedbackForm.rating }} 顆星 ({{ feedbackForm.rating === 5 ? '特優' : feedbackForm.rating >= 4 ? '優等' : '良好' }})</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">評審指導評語 / 勉勵辭</label>
+          <textarea v-model="feedbackForm.comment" rows="3" required placeholder="請留下對分團本項專案成果之勉勵或改善建議..." class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
+        </div>
+
+        <div class="pt-2 flex justify-end space-x-3">
+          <button type="button" @click="showFeedbackModal = false" class="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl text-xs font-bold">取消</button>
+          <button type="button" @click="submitFeedback" class="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-bold shadow">提交評核紀錄</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const { createApp, ref, computed, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        const token = ref('');
+        const reviewerName = ref('');
+        const tokenError = ref('');
+        const radarStats = ref({});
+        const items = ref([]);
+        const selectedYear = ref('2026');
+        const selectedCategory = ref('');
+
+        const showFeedbackModal = ref(false);
+        const activeItem = ref({});
+        const feedbackForm = ref({ rating: 5, comment: '' });
+
+        const checkToken = async () => {
+          const urlParams = new URLSearchParams(window.location.search);
+          token.value = urlParams.get('token') || '';
+          if (!token.value) {
+            tokenError.value = '請使用帶有有效安全 Token 的專屬評審連結進入此審閱專區。';
+            return;
+          }
+          try {
+            const res = await fetch(`/api/auth/verify-reviewer-token/${token.value}`);
+            const data = await res.json();
+            if (res.ok) {
+              reviewerName.value = data.reviewer_name;
+              loadData();
+            } else {
+              tokenError.value = data.detail || '評審通行證驗證失敗';
+            }
+          } catch (e) {
+            tokenError.value = '無法連線至道場伺服器';
+          }
+        };
+
+        const loadData = async () => {
+          try {
+            const [radarRes, itemsRes] = await Promise.all([
+              fetch(`/api/evidence/radar-stats?year=${selectedYear.value}`),
+              fetch(`/api/evidence?year=${selectedYear.value}`)
+            ]);
+            if (radarRes.ok) radarStats.value = await radarRes.json();
+            if (itemsRes.ok) items.value = await itemsRes.json();
+          } catch (e) {
+            console.error(e);
+          }
+        };
+
+        const loadItems = () => {
+          loadData();
+        };
+
+        const filteredItems = computed(() => {
+          return items.value.filter(it => !selectedCategory.value || it.category === selectedCategory.value);
+        });
+
+        const openFeedbackModal = (item) => {
+          activeItem.value = item;
+          feedbackForm.value = { rating: 5, comment: '' };
+          showFeedbackModal.value = true;
+        };
+
+        const submitFeedback = async () => {
+          if (!feedbackForm.value.comment.trim()) {
+            alert('請填寫評審指導評語');
+            return;
+          }
+          try {
+            const res = await fetch(`/api/evidence/${activeItem.value.id}/feedback`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                reviewer_name: reviewerName.value || '評鑑委員',
+                rating: feedbackForm.value.rating,
+                comment: feedbackForm.value.comment
+              })
+            });
+            if (res.ok) {
+              alert('🎉 感謝您的慈悲指導！評語與星級評等已成功記錄！');
+              showFeedbackModal.value = false;
+            } else {
+              alert('提交失敗');
+            }
+          } catch (e) {
+            alert('連線失敗');
+          }
+        };
+
+        const getCatName = (cat) => {
+          const map = { culture: '文化弘法', education: '教育培力', cultivation: '共修淨心', charity: '慈善福田' };
+          return map[cat] || cat;
+        };
+
+        const getBadgeClass = (cat) => {
+          const map = {
+            culture: 'bg-amber-100 text-amber-800',
+            education: 'bg-blue-100 text-blue-800',
+            cultivation: 'bg-emerald-100 text-emerald-800',
+            charity: 'bg-rose-100 text-rose-800'
+          };
+          return map[cat] || 'bg-slate-100 text-slate-800';
+        };
+
+        onMounted(() => {
+          checkToken();
+        });
+
+        return {
+          token,
+          reviewerName,
+          tokenError,
+          radarStats,
+          items,
+          selectedYear,
+          selectedCategory,
+          filteredItems,
+          showFeedbackModal,
+          activeItem,
+          feedbackForm,
+          loadItems,
+          openFeedbackModal,
+          submitFeedback,
+          getCatName,
+          getBadgeClass
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
