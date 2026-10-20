@@ -1,31 +1,6 @@
 import io
 import re
-try:
-    import weasyprint
-    HAS_WEASYPRINT = True
-except (ImportError, OSError, Exception):
-    weasyprint = None
-    HAS_WEASYPRINT = False
-
-def safe_html_to_pdf(html_content: str, title: str = "BLIA Hsinchu Youth") -> bytes:
-    if HAS_WEASYPRINT and weasyprint is not None:
-        try:
-            return safe_html_to_pdf(html_content)
-        except Exception:
-            pass
-    try:
-        from reportlab.lib.pagesizes import letter
-        from reportlab.pdfgen import canvas
-        buffer = io.BytesIO()
-        p = canvas.Canvas(buffer, pagesize=letter)
-        p.drawString(40, 750, f"BLIA Hsinchu Youth - {title}")
-        p.drawString(40, 730, "[Generated via Safe PDF Fallback Engine]")
-        p.showPage()
-        p.save()
-        buffer.seek(0)
-        return buffer.getvalue()
-    except Exception:
-        return b"%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000009 00000 n\n0000000052 00000 n\n0000000108 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n185\n%%EOF"
+from app.pdf_utils import html_to_pdf_bytes as safe_html_to_pdf
 from app.config import UPLOAD_DIR
 from fastapi.responses import FileResponse
 from datetime import datetime

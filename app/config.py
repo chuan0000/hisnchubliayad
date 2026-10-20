@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import tempfile
 from pathlib import Path
 
 # Base paths
@@ -8,8 +9,8 @@ UPLOAD_DIR = BASE_DIR / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
 # Database auto-detection:
-# 在標準本機環境 (Windows/macOS/Linux) 自動使用專案根目錄下的 hsinchu_youth.db
-# 在部分雲端虛擬機檔案鎖定受限環境自動兼容 /tmp
+# 在標準本機環境 (Windows/macOS/Linux，包含 x86 與 ARM 架構) 自動使用專案根目錄下的 hsinchu_youth.db
+# 在部分檔案鎖定受限環境自動無縫相容系統暫存目錄 (跨平台 tempfile 相容)
 local_db_path = BASE_DIR / "hsinchu_youth.db"
 auto_db_url = f"sqlite:///{local_db_path}"
 
@@ -18,7 +19,8 @@ try:
     _test_conn.execute("CREATE TABLE IF NOT EXISTS _test_lock (id int);")
     _test_conn.close()
 except Exception:
-    auto_db_url = "sqlite:////tmp/hsinchu_youth.db"
+    fallback_db = Path(tempfile.gettempdir()) / "hsinchu_youth.db"
+    auto_db_url = f"sqlite:///{fallback_db}"
 
 DATABASE_URL = os.getenv("DATABASE_URL", auto_db_url)
 

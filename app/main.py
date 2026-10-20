@@ -34,7 +34,7 @@ UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 app.mount("/uploads", StaticFiles(directory=str(UPLOAD_DIR)), name="uploads")
 
-# 註冊 API 路由（涵蓋 100 項功能與四大進階模組）
+# 註冊 API 路由
 app.include_router(auth.router)
 app.include_router(blocks.router)
 app.include_router(evidence.router)
@@ -84,6 +84,7 @@ app.include_router(blocks.centenary_router)
 app.include_router(blocks.wishlist_router)
 app.include_router(blocks.crawler_router)
 
+# 前台、後台與評審 VIP 通道路由
 # 【功能 50】PWA Progressive Web App 漸進式網頁應用支援
 @app.get("/manifest.json", include_in_schema=False)
 def serve_manifest():
@@ -93,7 +94,6 @@ def serve_manifest():
 def serve_sw():
     return FileResponse(STATIC_DIR / "sw.js", media_type="application/javascript")
 
-# 防快取標頭：確保瀏覽器永遠載入最新版頁面
 NO_CACHE_HEADERS = {
     'Cache-Control': 'no-cache, no-store, must-revalidate',
     'Pragma': 'no-cache',
@@ -112,6 +112,7 @@ def serve_admin():
 def serve_eval():
     return FileResponse(STATIC_DIR / 'eval.html', headers=NO_CACHE_HEADERS)
 
+
 @app.get("/healthcheck", tags=["系統狀態"])
 def healthcheck():
     return {
@@ -120,6 +121,9 @@ def healthcheck():
         "database": "SQLite (Local)",
         "uploads_ready": UPLOAD_DIR.exists()
     }
+
+
+
 
 if __name__ == '__main__':
     import uvicorn

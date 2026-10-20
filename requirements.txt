@@ -7,6 +7,5 @@ aiofiles>=23.1.0
 openpyxl>=3.1.0
 python-docx>=1.0.0
 python-pptx>=0.6.21
-python-jose[cryptography]>=3.3.0
-passlib[bcrypt]>=1.7.4
+pillow>=9.0.0
 reportlab>=3.6.0

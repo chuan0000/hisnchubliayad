@@ -9,64 +9,7 @@ import shutil
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 import uuid
-try:
-    import weasyprint
-    HAS_WEASYPRINT = True
-except (ImportError, OSError, Exception):
-    weasyprint = None
-    HAS_WEASYPRINT = False
-
-def safe_html_to_pdf(html_content: str, title: str = "BLIA Hsinchu Youth") -> bytes:
-    if HAS_WEASYPRINT and weasyprint is not None:
-        try:
-            return safe_html_to_pdf(html_content)
-        except Exception:
-            pass
-    try:
-        from reportlab.lib.pagesizes import letter
-        from reportlab.pdfgen import canvas
-        from reportlab.lib import colors
-        buffer = io.BytesIO()
-        p = canvas.Canvas(buffer, pagesize=letter)
-        width, height = letter
-        p.setFillColor(colors.HexColor("#D97706"))
-        p.rect(0, height - 60, width, 60, fill=True, stroke=False)
-        p.setFillColor(colors.white)
-        p.setFont("Helvetica-Bold", 14)
-        p.drawString(40, height - 38, f"BLIA Hsinchu Youth - {title}")
-        p.setFillColor(colors.HexColor("#78350F"))
-        p.setFont("Helvetica-Oblique", 9)
-        p.drawString(40, height - 75, "[Generated via Safe PDF Fallback Engine. GTK/WeasyPrint optional]")
-        import re
-        clean_text = re.sub(r'<style.*?</style>', '', html_content, flags=re.DOTALL)
-        clean_text = re.sub(r'<[^<]+?>', ' ', clean_text)
-        clean_text = re.sub(r'\s+', ' ', clean_text).strip()
-        p.setFillColor(colors.black)
-        p.setFont("Helvetica", 10)
-        y = height - 100
-        words = clean_text.split(' ')
-        cur = []
-        for w in words:
-            cur.append(w)
-            if len(' '.join(cur)) > 75:
-                line_str = ' '.join(cur)
-                safe_str = line_str.encode('latin-1', 'replace').decode('latin-1')
-                p.drawString(40, y, safe_str)
-                y -= 15
-                cur = []
-                if y < 60:
-                    p.showPage()
-                    y = height - 60
-                    p.setFont("Helvetica", 10)
-        if cur:
-            safe_str = ' '.join(cur).encode('latin-1', 'replace').decode('latin-1')
-            p.drawString(40, y, safe_str)
-        p.showPage()
-        p.save()
-        buffer.seek(0)
-        return buffer.getvalue()
-    except Exception:
-        return b"%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj\n3 0 obj<</Type/Page/MediaBox[0 0 612 792]/Parent 2 0 R/Resources<<>>>>endobj\nxref\n0 4\n0000000000 65535 f\n0000000009 00000 n\n0000000052 00000 n\n0000000108 00000 n\ntrailer<</Size 4/Root 1 0 R>>\nstartxref\n185\n%%EOF"
+from app.pdf_utils import html_to_pdf_bytes as safe_html_to_pdf
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File, Form, Body
 from fastapi.responses import FileResponse, HTMLResponse, Response
 try:
